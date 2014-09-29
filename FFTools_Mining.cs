@@ -54,9 +54,9 @@ namespace FFTools {
 
         // Distance between player and targetx,targety.
         private static float findDistanceBetween(Player thePlayer, float tx, float ty) {
-        	float dx = thePlayer.x - tx;
-        	float dy = thePlayer.y - ty;
-        	return (float)Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2));
+            float dx = thePlayer.x - tx;
+            float dy = thePlayer.y - ty;
+            return (float)Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2));
         }
 
         // Angle between player and targetx,targety.
@@ -175,19 +175,19 @@ namespace FFTools {
         }
 
         private static MineralDeposit nearestVisibleMineralDeposit(Player thePlayer, List<MineralDeposit> theMinDepList) {
-        	List<MineralDeposit> visibleList = new List<MineralDeposit>();
-        	foreach (MineralDeposit md in theMinDepList) {
-        		if (md.vis) visibleList.Add(md);
-        	}
-        	MineralDeposit nearestMineralDeposit = null;
-        	float nearestMineralDepositDistance = Single.MaxValue;
-        	foreach (MineralDeposit md in visibleList) {
-        		float distance = findDistanceBetween(thePlayer, md.x, md.y);
-        		if (distance < nearestMineralDepositDistance) {
-        			nearestMineralDepositDistance = distance;
-        			nearestMineralDeposit = md;
-        		}
-        	}
+            List<MineralDeposit> visibleList = new List<MineralDeposit>();
+            foreach (MineralDeposit md in theMinDepList) {
+                if (md.vis) visibleList.Add(md);
+            }
+            MineralDeposit nearestMineralDeposit = null;
+            float nearestMineralDepositDistance = Single.MaxValue;
+            foreach (MineralDeposit md in visibleList) {
+                float distance = findDistanceBetween(thePlayer, md.x, md.y);
+                if (distance < nearestMineralDepositDistance) {
+                    nearestMineralDepositDistance = distance;
+                    nearestMineralDeposit = md;
+                }
+            }
             return nearestMineralDeposit;
         }
     }
