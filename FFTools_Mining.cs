@@ -12,30 +12,34 @@ namespace FFTools {
 
     public class Mining {
         public static void Main() {
+            String MineType= "Mature Tree"; //set to desired farming type ex: Mineral Deposit, Mature Tree
+            byte[] MineTypeByteArray = Encoding.ASCII.GetBytes(MineType);
+
             MemoryManager theMemory = new MemoryManager();
             if (theMemory.initialize() > 0) Environment.Exit(1);
             Player thePlayer = theMemory.readPlayer();
             System.Console.WriteLine(thePlayer);
             List<string> theGenDiagList = theMemory.readGeneralDialogueList();
 
-            List<MineralDeposit> theMinDepList = theMemory.readMineralDepositList();
-            foreach (MineralDeposit md in theMinDepList) {
-                System.Console.WriteLine(md);
-            }
-
-            //while (true) {
-            //    List<MineralDeposit> theMinDepList = theMemory.readMineralDepositList();
-            //    System.Console.WriteLine("-------");
-            //    System.Console.WriteLine("Nearest mineral deposit is at...");
-            //    MineralDeposit md = nearestVisibleMineralDeposit(thePlayer, theMinDepList);
-            //    System.Console.WriteLine(md);
-            //    System.Console.WriteLine("With a distance of " + findDistanceBetween(thePlayer, md.x, md.y));
-            //    System.Console.WriteLine("Need to face " + findOrientationRelativeTo(thePlayer, md.x, md.y));
-            //    System.Console.WriteLine("Traveling to the node...");
-            //    travelTo(theMemory, md.x, md.y);
-            //    mineFrom(theMemory);
-            //    System.Console.WriteLine("Done with this node!");
+            //List<MineralDeposit> theMinDepList = theMemory.readMineralDepositList();
+            //foreach (MineralDeposit md in theMinDepList) {
+                //System.Console.WriteLine(md);
             //}
+
+            while (true) {
+                List<IntPtr> MineTypeAddresses = theMemory.findAddresses(MineTypeByteArray);
+                List<MineralDeposit> theMinDepList = theMemory.readMineralDepositList(MineTypeAddresses);
+                System.Console.WriteLine("-------");
+                System.Console.WriteLine("Nearest mineral deposit is at...");
+                MineralDeposit md = nearestVisibleMineralDeposit(thePlayer, theMinDepList);
+                System.Console.WriteLine(md);
+                System.Console.WriteLine("With a distance of " + findDistanceBetween(thePlayer, md.x, md.y));
+                System.Console.WriteLine("Need to face " + findOrientationRelativeTo(thePlayer, md.x, md.y));
+                System.Console.WriteLine("Traveling to the node...");
+                travelTo(theMemory, md.x, md.y);
+                mineFrom(theMemory);
+                System.Console.WriteLine("Done with this node!");
+            }
         }
 
         private static void mineFrom(MemoryManager theMemory) {

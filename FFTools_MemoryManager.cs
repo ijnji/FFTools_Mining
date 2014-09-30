@@ -1,4 +1,7 @@
 using System;
+using System.Linq;
+using System.Text;
+using System.IO;
 using System.Diagnostics; 
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -9,6 +12,12 @@ namespace FFTools {
     public class MemoryManager {
         // Memory handling.
         private const int PERM_PROC_WM_READ = 0x0010;
+        private const int MEM_COMMIT = 0x00001000;
+        private const int PAGE_READWRITE = 0x04;
+        private const int PAGE_READONLY= 0x02;
+        private const int PAGE_EXECUTE_READWRITE = 0x40;
+        private const int PAGE_EXECUTE_READ = 0x20;
+        private const int PROCESS_QUERY_INFORMATION = 0x0400;
         private const int WM_KEYDOWN = 0x0100;
         private const int WM_KEYUP = 0x0101;
         [DllImport("user32.dll")]
@@ -17,6 +26,8 @@ namespace FFTools {
         private static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
         [DllImport("kernel32.dll")]
         private static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, int nSize, ref int plNumberOfBytesRead);
+        [DllImport("kernel32.dll", SetLastError=true)]
+        private static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, uint dwLength);
         [DllImport("user32.dll")]
         private static extern IntPtr PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
 
@@ -51,9 +62,18 @@ namespace FFTools {
         private IntPtr AddrPlayerX = IntPtr.Zero;
         private IntPtr AddrGenDiag = IntPtr.Zero;
         private IntPtr AddrFishBite = IntPtr.Zero;
-        private IntPtr[] AddrMinDep = null;
 
         // Other fields. 
+        public struct MEMORY_BASIC_INFORMATION
+        {
+            public IntPtr BaseAddress;
+            public IntPtr AllocationBase;
+            public uint AllocationProtect;
+            public IntPtr RegionSize;
+            public uint State;
+            public uint Protect;
+            public uint lType;
+        }
     
         public MemoryManager() {}
 
@@ -87,31 +107,6 @@ namespace FFTools {
             AddrFishBite = pointerWalk(ProcAddrBase, ADDR_PWALK_FISHBITE);
             System.Console.WriteLine("Setting fish bite status address as 0x" + AddrFishBite.ToString("X8"));
          
-            System.Console.WriteLine("---");
-            System.Console.WriteLine("Manually setting the mineral deposit addresses...");
-            AddrMinDep = new [] {
-(IntPtr)0x12CF9560,
-(IntPtr)0x12CF9740,
-(IntPtr)0x12CF9920,
-(IntPtr)0x12CF9B00,
-(IntPtr)0x12CFA280,
-(IntPtr)0x12CFA460,
-(IntPtr)0x12CFA640,
-(IntPtr)0x12CFA820,
-(IntPtr)0x12CFAA00,
-(IntPtr)0x12CFABE0,
-(IntPtr)0x12CFADC0,
-(IntPtr)0x12CFAFA0,
-(IntPtr)0x12CFB180,
-(IntPtr)0x12CFB360,
-(IntPtr)0x12CFB540,
-(IntPtr)0x12CFB720
-            };
-            System.Console.Write("Setting fish bite status address as {");
-            foreach (IntPtr ip in AddrMinDep) {
-                System.Console.Write("0x" + ip.ToString("X8") + ", ");
-            }
-            System.Console.WriteLine("}");
             System.Console.WriteLine("---");
 
             return 0;
@@ -263,9 +258,9 @@ namespace FFTools {
             else return false;
         }
 
-        public List<MineralDeposit> readMineralDepositList() {
+        public List<MineralDeposit> readMineralDepositList(List<IntPtr> Addresses) {
             List<MineralDeposit> mdlist = new List<MineralDeposit>();
-            foreach (IntPtr mdaddr in AddrMinDep) {
+            foreach (IntPtr mdaddr in Addresses) {
                 bool vis = (readProcInt(IntPtr.Add(mdaddr, ADDR_OFF_MINDEPVIS)) == MINDEP_VIS) ? true : false;
                 float mdx = readProcFloat(IntPtr.Add(mdaddr, ADDR_OFF_MINDEPX));
                 float mdz = readProcFloat(IntPtr.Add(mdaddr, ADDR_OFF_MINDEPZ));
@@ -273,6 +268,53 @@ namespace FFTools {
                 mdlist.Add(new MineralDeposit(vis, mdx, mdz, mdy));
             }
             return mdlist;
+        }
+
+        public List <IntPtr> findAddresses (byte[] Stuff) {
+        //Find visible nodes
+            long PROC_VM_SIZE = this.Proc.VirtualMemorySize64;
+            long mem_count = 0;
+            List <IntPtr> Addresses = new List <IntPtr> ();
+            IntPtr address = this.ProcAddrBase;
+            
+            // this will store any information we get from VirtualQueryEx()
+            MEMORY_BASIC_INFORMATION mem_basic_info = new MEMORY_BASIC_INFORMATION();
+            int bytesRead = 0;  // number of bytes read with ReadProcessMemory
+    
+            //search memory
+            while (mem_count <= PROC_VM_SIZE)
+            {
+                VirtualQueryEx(this.ProcHandle, address, out mem_basic_info, (uint) Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
+                // if this memory chunk is readable 
+                if ((mem_basic_info.Protect == PAGE_READWRITE
+                     || mem_basic_info.Protect == PAGE_READONLY
+                     || mem_basic_info.Protect == PAGE_EXECUTE_READWRITE
+                     || mem_basic_info.Protect == PAGE_EXECUTE_READ) 
+                        && mem_basic_info.State == MEM_COMMIT)
+                {
+                    byte[] buffer = new byte[(int)mem_basic_info.RegionSize];
+                    //read memory and dump into buffer to search 
+                    ReadProcessMemory(ProcHandle, mem_basic_info.BaseAddress, buffer, (int)mem_basic_info.RegionSize, ref bytesRead);
+                    mem_count = mem_count + bytesRead;
+                    //search buffer
+                    int i = 0;
+                    while (i < (int) mem_basic_info.RegionSize) {
+                        int p = 0;
+                        while ((buffer[i] == Stuff[p]) && (p < Stuff.Length) && (i < (int) mem_basic_info.RegionSize)) {
+                            i++; p++;
+                        }
+                        if (p == Stuff.Length) {
+                            address = address + i - Stuff.Length;
+                            System.Console.WriteLine("Stuff Found! " + address.ToString("X8"));
+                            Addresses.Add(address);
+                        }
+                        i++;
+                    }
+                }
+                // move to the next memory chunk
+                address = new IntPtr((long)address + (long) mem_basic_info.RegionSize);
+            }       
+            return Addresses;
         }
     }
 }
