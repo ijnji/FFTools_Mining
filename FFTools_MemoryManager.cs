@@ -272,9 +272,9 @@ namespace FFTools {
 
         public List <IntPtr> findAddresses (byte[] Stuff) {
         //Find visible nodes
-            System.Console.WriteLine("finding addresses of stuff");
+            //System.Console.WriteLine("finding addresses of stuff");
             long PROC_VM_SIZE = this.Proc.VirtualMemorySize64;
-            System.Console.WriteLine("process memory size: "+PROC_VM_SIZE);
+            //System.Console.WriteLine("process memory size: "+PROC_VM_SIZE);
             long mem_count = 0;
             List <IntPtr> Addresses = new List <IntPtr> ();
             IntPtr address = this.ProcAddrBase;
@@ -308,7 +308,7 @@ namespace FFTools {
                         }
                         if (p == Stuff.Length) {
                             StuffAddress = address + i - Stuff.Length;
-                            System.Console.WriteLine("Stuff Found! " + StuffAddress.ToString("X8"));
+                            //System.Console.WriteLine("Stuff Found! " + StuffAddress.ToString("X8"));
                             Addresses.Add(StuffAddress);
                         }
                         i++;
@@ -318,7 +318,7 @@ namespace FFTools {
                 mem_count = mem_count + (long)mem_basic_info.RegionSize;
                 address = new IntPtr((long)address + (long) mem_basic_info.RegionSize);
             }
-            System.Console.WriteLine("memory searched :" + mem_count);
+            //System.Console.WriteLine("memory searched :" + mem_count);
             return Addresses;
         }
     }

@@ -27,6 +27,7 @@ namespace FFTools {
             //}
 
             while (true) {
+                thePlayer = theMemory.readPlayer();
                 List<IntPtr> MineTypeAddresses = theMemory.findAddresses(MineTypeByteArray);
                 List<MineralDeposit> theMinDepList = theMemory.readMineralDepositList(MineTypeAddresses);
                 System.Console.WriteLine("-------");
@@ -44,13 +45,13 @@ namespace FFTools {
 
         private static void mineFrom(MemoryManager theMemory) {
             theMemory.sendKeyPressMsg(Keys.End, 500);
-            Thread.Sleep(500);
-            theMemory.sendKeyPressMsg(Keys.F9, 500);
-            Thread.Sleep(200);
-            theMemory.sendKeyPressMsg(Keys.NumPad1, 500);
+            Thread.Sleep(1500);
+            theMemory.sendKeyPressMsg(Keys.Enter, 500);
+            Thread.Sleep(1500);
+            theMemory.sendKeyPressMsg(Keys.Enter, 500);
             Thread.Sleep(1500);
             for (int i = 0; i < 4; i++) {
-                theMemory.sendKeyPressMsg(Keys.NumPad1, 500);
+                theMemory.sendKeyPressMsg(Keys.Enter, 500);
                 Thread.Sleep(3600);
             }
             Thread.Sleep(3000);
