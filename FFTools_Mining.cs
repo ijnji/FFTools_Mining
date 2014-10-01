@@ -36,7 +36,6 @@ namespace FFTools {
                 System.Console.WriteLine(md);
                 System.Console.WriteLine("With a distance of " + findDistanceBetween(thePlayer, md.x, md.y));
                 System.Console.WriteLine("Need to face " + findOrientationRelativeTo(thePlayer, md.x, md.y));
-                Console.ReadLine();
                 System.Console.WriteLine("Traveling to the node...");
                 travelTo(theMemory, md.x, md.y);
                 mineFrom(theMemory);
