@@ -25,34 +25,49 @@ namespace FFTools {
             //foreach (MineralDeposit md in theMinDepList) {
                 //System.Console.WriteLine(md);
             //}
-
+            List<IntPtr> MineTypeAddresses = theMemory.findAddresses(MineTypeByteArray);
+            List<MineralDeposit> theMinDepList = theMemory.readMineralDepositList(MineTypeAddresses);
+            MineralDeposit md = nearestVisibleMineralDeposit(thePlayer, theMinDepList);
+            Queue<MineralDeposit> mdHistory = new Queue<MineralDeposit>();
             while (true) {
                 thePlayer = theMemory.readPlayer();
-                List<IntPtr> MineTypeAddresses = theMemory.findAddresses(MineTypeByteArray);
-                List<MineralDeposit> theMinDepList = theMemory.readMineralDepositList(MineTypeAddresses);
+                MineTypeAddresses = theMemory.findAddresses(MineTypeByteArray);
+                theMinDepList = theMemory.readMineralDepositList(MineTypeAddresses);
                 System.Console.WriteLine("-------");
                 System.Console.WriteLine("Nearest mineral deposit is at...");
-                MineralDeposit md = nearestVisibleMineralDeposit(thePlayer, theMinDepList);
+                md = nearestVisibleMineralDeposit(thePlayer, theMinDepList);
                 System.Console.WriteLine(md);
-                System.Console.WriteLine("With a distance of " + findDistanceBetween(thePlayer, md.x, md.y));
-                System.Console.WriteLine("Need to face " + findOrientationRelativeTo(thePlayer, md.x, md.y));
-                System.Console.WriteLine("Traveling to the node...");
-                travelTo(theMemory, md.x, md.y);
-                mineFrom(theMemory);
-                System.Console.WriteLine("Done with this node!");
+                if( findDistanceBetween(thePlayer, md.x, md.y) < 250) {
+                    System.Console.WriteLine("With a distance of " + findDistanceBetween(thePlayer, md.x, md.y));
+                    System.Console.WriteLine("Need to face " + findOrientationRelativeTo(thePlayer, md.x, md.y));
+                    System.Console.WriteLine("Traveling to the node...");
+                    travelTo(theMemory, md.x, md.y);
+                    mineFrom(theMemory);
+                    System.Console.WriteLine("Done with this node!");
+                    if (mdHistory.Count > 10) mdHistory.Dequeue();
+                    mdHistory.Enqueue(md);
+                }
+                else {
+                    System.Console.WriteLine("No nearby node, moving to previous good node and searching again");
+                    md = mdHistory.Dequeue();
+                    System.Console.WriteLine("With a distance of " + findDistanceBetween(thePlayer, md.x, md.y));
+                    System.Console.WriteLine("Need to face " + findOrientationRelativeTo(thePlayer, md.x, md.y));
+                    System.Console.WriteLine("Traveling to the node...");
+                    travelTo(theMemory, md.x, md.y);
+                }
             }
         }
 
         private static void mineFrom(MemoryManager theMemory) {
-            theMemory.sendKeyPressMsg(Keys.End, 500);
-            Thread.Sleep(1500);
-            theMemory.sendKeyPressMsg(Keys.Enter, 500);
-            Thread.Sleep(1500);
-            theMemory.sendKeyPressMsg(Keys.Enter, 500);
-            Thread.Sleep(1500);
+            theMemory.sendKeyPressMsg(Keys.End, 100);
+            Thread.Sleep(2500);
+            theMemory.sendKeyPressMsg(Keys.Enter, 100);
+            Thread.Sleep(2500);
+            theMemory.sendKeyPressMsg(Keys.Enter, 100);
+            Thread.Sleep(2500);
             for (int i = 0; i < 4; i++) {
-                theMemory.sendKeyPressMsg(Keys.Enter, 500);
-                Thread.Sleep(3600);
+                theMemory.sendKeyPressMsg(Keys.Enter, 100);
+                Thread.Sleep(5000);
             }
             Thread.Sleep(3000);
         }
