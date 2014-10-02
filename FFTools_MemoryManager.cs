@@ -90,22 +90,18 @@ namespace FFTools {
             System.Console.WriteLine("---");
             System.Console.WriteLine("Manually setting the mineral deposit addresses...");
             AddrMinDep = new [] {
-(IntPtr)0x12CF9560,
-(IntPtr)0x12CF9740,
-(IntPtr)0x12CF9920,
-(IntPtr)0x12CF9B00,
-(IntPtr)0x12CFA280,
-(IntPtr)0x12CFA460,
-(IntPtr)0x12CFA640,
-(IntPtr)0x12CFA820,
-(IntPtr)0x12CFAA00,
-(IntPtr)0x12CFABE0,
-(IntPtr)0x12CFADC0,
-(IntPtr)0x12CFAFA0,
-(IntPtr)0x12CFB180,
-(IntPtr)0x12CFB360,
-(IntPtr)0x12CFB540,
-(IntPtr)0x12CFB720
+                (IntPtr)0x13585100,
+                (IntPtr)0x135852E0,
+                (IntPtr)0x135854C0,
+                (IntPtr)0x135856A0,
+                (IntPtr)0x13585880,
+                (IntPtr)0x13585A60,
+                (IntPtr)0x13585C40,
+                (IntPtr)0x13585E20,
+                (IntPtr)0x13586000,
+                (IntPtr)0x135861E0,
+                (IntPtr)0x135863C0,
+                (IntPtr)0x135865A0
             };
             System.Console.Write("Setting fish bite status address as {");
             foreach (IntPtr ip in AddrMinDep) {

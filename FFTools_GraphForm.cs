@@ -8,10 +8,13 @@ using System.Windows.Forms;
 namespace FFTools {
     public class GraphForm : Form {
         // Unit conversion constants.
-        private const int BITMAP_SIZE_IN_PIXELS = 2200;
+        private const int BITMAP_SIZE_IN_PIXELS = 2000;
         private const int BITMAP_OFFSET_TO_ORIGIN = BITMAP_SIZE_IN_PIXELS / 2;
         // Grid appearance constants.
-        private const int GRID_PADDING_IN_PIXELS = 100;
+        private const int GRID_TOP_PADDING_IN_PIXELS = 20;
+        private const int GRID_LEFT_PADDING_IN_PIXELS = 20;
+        private const int GRID_RIGHT_PADDING_IN_PIXELS = 45;
+        private const int GRID_BOTTOM_PADDING_IN_PIXELS = 65;
         private const int GRID_SPACING_IN_EILMS = 5;
         private const int GRID_PIXELS_PER_ILMS = 2;
         // Grid color constants.
@@ -34,7 +37,7 @@ namespace FFTools {
             this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             this.SetStyle(ControlStyles.SupportsTransparentBackColor, true);
             this.Size = new Size(500, 500);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             ViewMinDepList = new List<MineralDeposit>();
             ViewPlayer = new Player(0, 0, 0, 0);
         }
@@ -82,42 +85,44 @@ namespace FFTools {
             // Find top-left, bottom-right in aboslute ilms of mineral deposits.
             // Convert to absolute pixels for bitmap.
             // Resize form accoridingly and draw.
-            float smallestX = BITMAP_OFFSET_TO_ORIGIN;
-            float smallestY = BITMAP_OFFSET_TO_ORIGIN;
-            float largestX = -BITMAP_OFFSET_TO_ORIGIN;
-            float largestY = -BITMAP_OFFSET_TO_ORIGIN;
+            float topleftx = BITMAP_OFFSET_TO_ORIGIN / GRID_PIXELS_PER_ILMS;
+            float toplefty = -BITMAP_OFFSET_TO_ORIGIN / GRID_PIXELS_PER_ILMS;
+            float botrighx = -BITMAP_OFFSET_TO_ORIGIN / GRID_PIXELS_PER_ILMS;
+            float botrighy = BITMAP_OFFSET_TO_ORIGIN / GRID_PIXELS_PER_ILMS;
+
             foreach (MineralDeposit tvmd in tmpViewMinDepList) {
-                if (tvmd.x < smallestX) smallestX = tvmd.x;
-                if (tvmd.y < smallestY) smallestY = tvmd.y;
-                if (tvmd.x > largestX) largestX = tvmd.x;
-                if (tvmd.y > largestY) largestY = tvmd.y;
-            }
-            int bitmapSmallestX = (int)Math.Round(smallestX * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN;
-            int bitmapSmallestY = (int)Math.Round(smallestY * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN;
-            int bitmapLargestX = (int)Math.Round(largestX * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN;
-            int bitmapLargestY = (int)Math.Round(largestY * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN;
-
-            // If there 1 or fewer mineral deposits, default to a size.
-            if (tmpViewMinDepList.Count < 2) {
-                bitmapSmallestX = BITMAP_OFFSET_TO_ORIGIN - 200;
-                bitmapSmallestY = BITMAP_OFFSET_TO_ORIGIN - 200;
-                bitmapLargestX = BITMAP_OFFSET_TO_ORIGIN + 200;
-                bitmapLargestY = BITMAP_OFFSET_TO_ORIGIN + 200;
+                if (tvmd.x < topleftx) topleftx = tvmd.x;
+                if (tvmd.y > toplefty) toplefty = tvmd.y;
+                if (tvmd.x > botrighx) botrighx = tvmd.x;
+                if (tvmd.y < botrighy) botrighy = tvmd.y;
             }
 
-            this.Size = new Size(bitmapLargestX - bitmapSmallestX + (2*GRID_PADDING_IN_PIXELS),
-                                 bitmapLargestY - bitmapSmallestY + (2*GRID_PADDING_IN_PIXELS));
+            int bitmaptopleftx = (int)Math.Round(topleftx * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN;
+            int bitmaptoplefty = BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(toplefty * GRID_PIXELS_PER_ILMS);
+            int bitmapbotrighx = (int)Math.Round(botrighx * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN;
+            int bitmapbotrighy = BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(botrighy * GRID_PIXELS_PER_ILMS);
+
+            this.Size = new Size(bitmapbotrighx - bitmaptopleftx + 
+                                 GRID_LEFT_PADDING_IN_PIXELS + GRID_RIGHT_PADDING_IN_PIXELS,
+                                 bitmapbotrighy - bitmaptoplefty +
+                                 GRID_TOP_PADDING_IN_PIXELS + GRID_BOTTOM_PADDING_IN_PIXELS);
             Graphics gForm = e.Graphics;
             gForm.FillRectangle(Brushes.Black, 0, 0, 
-                                bitmapLargestX - bitmapSmallestX + (2*GRID_PADDING_IN_PIXELS),
-                                bitmapLargestY - bitmapSmallestY + (2*GRID_PADDING_IN_PIXELS));
+                                bitmapbotrighx - bitmaptopleftx +
+                                GRID_LEFT_PADDING_IN_PIXELS + GRID_RIGHT_PADDING_IN_PIXELS,
+                                bitmapbotrighy - bitmaptoplefty +
+                                GRID_TOP_PADDING_IN_PIXELS + GRID_BOTTOM_PADDING_IN_PIXELS);
             RectangleF desRect = new RectangleF(0, 0,
-                                                bitmapLargestX - bitmapSmallestX + (2*GRID_PADDING_IN_PIXELS),
-                                                bitmapLargestY - bitmapSmallestY + (2*GRID_PADDING_IN_PIXELS));
-            RectangleF srcRect = new RectangleF(bitmapSmallestX - GRID_PADDING_IN_PIXELS,
-                                                bitmapSmallestY - GRID_PADDING_IN_PIXELS,
-                                                bitmapLargestX - bitmapSmallestX + (2*GRID_PADDING_IN_PIXELS),
-                                                bitmapLargestY - bitmapSmallestY + (2*GRID_PADDING_IN_PIXELS));
+                                                bitmapbotrighx - bitmaptopleftx +
+                                                GRID_LEFT_PADDING_IN_PIXELS + GRID_RIGHT_PADDING_IN_PIXELS,
+                                                bitmapbotrighy - bitmaptoplefty +
+                                                GRID_TOP_PADDING_IN_PIXELS + GRID_BOTTOM_PADDING_IN_PIXELS);
+            RectangleF srcRect = new RectangleF(bitmaptopleftx - GRID_LEFT_PADDING_IN_PIXELS,
+                                                bitmaptoplefty - GRID_TOP_PADDING_IN_PIXELS,
+                                                bitmapbotrighx - bitmaptopleftx +
+                                                GRID_LEFT_PADDING_IN_PIXELS + GRID_RIGHT_PADDING_IN_PIXELS,
+                                                bitmapbotrighy - bitmaptoplefty +
+                                                GRID_TOP_PADDING_IN_PIXELS + GRID_BOTTOM_PADDING_IN_PIXELS);
             gForm.DrawImage(bmp, desRect, srcRect, GraphicsUnit.Pixel);
         }
         private void paintGrid(Graphics gBmp) {
@@ -142,15 +147,15 @@ namespace FFTools {
             foreach (MineralDeposit tvmd in tmpViewMinDepList) {
                 gBmp.FillEllipse(mdBrush, 
                     (int)Math.Round(tvmd.x * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN, 
-                    (int)Math.Round(tvmd.y * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN,
-                    6, 6);
+                     BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(tvmd.y * GRID_PIXELS_PER_ILMS),
+                    4, 4);
             }
         }
         private void paintPlayer(Graphics gBmp, Player tmpViewPlayer) {
             gBmp.FillEllipse(Brushes.Crimson,
                 (int)Math.Round(tmpViewPlayer.x * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN,
-                (int)Math.Round(tmpViewPlayer.y * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN,
-                10, 10);
+                BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(tmpViewPlayer.y * GRID_PIXELS_PER_ILMS),
+                6, 6);
         }
         private void paintText(Graphics gBmp) {
             Font labelFont = new Font("Century Gothic", 9);
