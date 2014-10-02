@@ -72,9 +72,9 @@ namespace FFTools {
             Player tmpViewPlayer;
             lock (DataLock) {
                 foreach (MineralDeposit vmd in ViewMinDepList) {
-                    tmpViewMinDepList.Add(new MineralDeposit(vmd.vis, vmd.x, vmd.z, vmd.y));
+                    tmpViewMinDepList.Add(new MineralDeposit(vmd.vis, vmd.location));
                 }
-                tmpViewPlayer = new Player(ViewPlayer.x, ViewPlayer.z, ViewPlayer.y, ViewPlayer.rot);
+                tmpViewPlayer = new Player(ViewPlayer.location, ViewPlayer.rot);
             }
 
             paintGrid(gBmp);
@@ -91,10 +91,10 @@ namespace FFTools {
             float botrighy = BITMAP_OFFSET_TO_ORIGIN / GRID_PIXELS_PER_ILMS;
 
             foreach (MineralDeposit tvmd in tmpViewMinDepList) {
-                if (tvmd.x < topleftx) topleftx = tvmd.x;
-                if (tvmd.y > toplefty) toplefty = tvmd.y;
-                if (tvmd.x > botrighx) botrighx = tvmd.x;
-                if (tvmd.y < botrighy) botrighy = tvmd.y;
+                if (tvmd.location.x < topleftx) topleftx = tvmd.location.x;
+                if (tvmd.location.y > toplefty) toplefty = tvmd.location.y;
+                if (tvmd.location.x > botrighx) botrighx = tvmd.location.x;
+                if (tvmd.location.y < botrighy) botrighy = tvmd.location.y;
             }
 
             int bitmaptopleftx = (int)Math.Round(topleftx * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN;
@@ -146,15 +146,15 @@ namespace FFTools {
                                                                GRID_COLOR_MINDEP_B));
             foreach (MineralDeposit tvmd in tmpViewMinDepList) {
                 gBmp.FillEllipse(mdBrush, 
-                    (int)Math.Round(tvmd.x * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN, 
-                     BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(tvmd.y * GRID_PIXELS_PER_ILMS),
+                    (int)Math.Round(tvmd.location.x * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN, 
+                     BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(tvmd.location.y * GRID_PIXELS_PER_ILMS),
                     4, 4);
             }
         }
         private void paintPlayer(Graphics gBmp, Player tmpViewPlayer) {
             gBmp.FillEllipse(Brushes.Crimson,
-                (int)Math.Round(tmpViewPlayer.x * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN,
-                BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(tmpViewPlayer.y * GRID_PIXELS_PER_ILMS),
+                (int)Math.Round(tmpViewPlayer.location.x * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN,
+                BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(tmpViewPlayer.location.y * GRID_PIXELS_PER_ILMS),
                 6, 6);
         }
         private void paintText(Graphics gBmp) {
@@ -167,16 +167,13 @@ namespace FFTools {
             lock (DataLock) {
                 ViewMinDepList.Clear();
                 foreach (MineralDeposit md in newMinDepList) {
-                    ViewMinDepList.Add(new MineralDeposit(md.vis, md.x, md.z, md.y));
+                    ViewMinDepList.Add(new MineralDeposit(md.vis, md.location));
                 }
             }
         }
         public void setViewPlayer(Player newPlayer) {
             lock (DataLock) {
-                ViewPlayer = new Player(newPlayer.x,
-                    newPlayer.z,
-                    newPlayer.y,
-                    newPlayer.rot);
+                ViewPlayer = new Player(newPlayer.location, newPlayer.rot);
             }
         }
     }
