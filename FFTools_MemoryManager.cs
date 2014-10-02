@@ -75,9 +75,9 @@ namespace FFTools {
             AddrPlayerX = pointerWalk(ProcAddrBase, ADDR_PWALK_PLAYX);
             System.Console.WriteLine("Setting fish bite status address as 0x" + AddrPlayerX.ToString("X8"));
 
-             System.Console.WriteLine("---");
-              //System.Console.WriteLine("Pointer walking for the general dialog box address...");
-              //AddrGenDiag = pointerWalk(ProcAddrBase, ADDROFFS_GENDIAG);
+            System.Console.WriteLine("---");
+            //System.Console.WriteLine("Pointer walking for the general dialog box address...");
+            //AddrGenDiag = pointerWalk(ProcAddrBase, ADDROFFS_GENDIAG);
             System.Console.WriteLine("Manually setting the general dialog box address...");
             AddrGenDiag = (IntPtr)0x05AF3680;
             System.Console.WriteLine("Setting general dialog box address as 0x" + AddrGenDiag.ToString("X8"));     
@@ -166,8 +166,6 @@ namespace FFTools {
             ReadProcessMemory(ProcHandle, addr, buffer, buffer.Length, ref bytesRead);
             return buffer;
         }
-
-
 
         public Player readPlayer() {
             float px = readProcFloat(AddrPlayerX);
