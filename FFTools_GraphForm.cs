@@ -7,55 +7,21 @@ using System.Windows.Forms;
 
 namespace FFTools {
     public class GraphForm : Form {
-        private static GraphForm TheGraphForm;
-        public static void Main() {
-            TheGraphForm = new GraphForm();
-            Thread formStartThread = new Thread(new ThreadStart(formStart));
-            formStartThread.Start();
-
-            List<MineralDeposit> mdlist = new List<MineralDeposit>();
-            //mdlist.Add(new MineralDeposit(false, (float)205.1436, 0, (float)-83.35779));
-            //mdlist.Add(new MineralDeposit(false, (float)216.1513, 0, (float)-87.30682));
-            //mdlist.Add(new MineralDeposit(false, (float)221.7113, 0, (float)-95.18837));
-            //mdlist.Add(new MineralDeposit(false, (float)225.8484, 0, (float)-106.7841));
-            //mdlist.Add(new MineralDeposit(false, (float)256.3488, 0, (float)-215.9667));
-            //mdlist.Add(new MineralDeposit(false, (float)262.8185, 0, (float)-170.5062));
-            //mdlist.Add(new MineralDeposit(false, (float)274.6811, 0, (float)-247.5));
-            //mdlist.Add(new MineralDeposit(false, (float)286.9102, 0, (float)-252.5938));
-            //mdlist.Add(new MineralDeposit(false, (float)317.0013, 0, (float)-178.881));
-            //mdlist.Add(new MineralDeposit(false, (float)323.3648, 0, (float)-182.2007));
-            //mdlist.Add(new MineralDeposit(false, (float)325.8448, 0, (float)-265.9896));
-            //mdlist.Add(new MineralDeposit(false, (float)333.5263, 0, (float)-214.3547));
-            //mdlist.Add(new MineralDeposit(false, (float)334.8407, 0, (float)-242.5161));
-            //mdlist.Add(new MineralDeposit(true , (float)332.7316, 0, (float)-256.8401));
-            //mdlist.Add(new MineralDeposit(true, (float)261.0139, 0, (float)-202.0589));
-            //mdlist.Add(new MineralDeposit(true, (float)291.211, 0, (float)-255.4915));
-            TheGraphForm.setViewMinDepList(mdlist);
-
-            while (true) {
-                for (int i = 0; i < 100; i++) {
-                    TheGraphForm.setViewPlayer(new Player(i, 0, i, 0));
-                    Thread.Sleep(50);
-                }
-            }
-        }
-
-        private static void formStart() {
-            Application.Run(TheGraphForm);
-        }
-
-
+        // Unit conversion constants.
         private const int BITMAP_SIZE_IN_PIXELS = 2200;
         private const int BITMAP_OFFSET_TO_ORIGIN = BITMAP_SIZE_IN_PIXELS / 2;
+        // Grid appearance constants.
         private const int GRID_PADDING_IN_PIXELS = 100;
         private const int GRID_SPACING_IN_EILMS = 5;
         private const int GRID_PIXELS_PER_ILMS = 2;
+        // Grid color constants.
         private const int GRID_COLOR_LINES_R = 0x30;
         private const int GRID_COLOR_LINES_G = 0x30;
         private const int GRID_COLOR_LINES_B = 0x30;
         private const int GRID_COLOR_MINDEP_R = 0xF0;
         private const int GRID_COLOR_MINDEP_G = 0xF0;
         private const int GRID_COLOR_MINDEP_B = 0xFF;
+
         private System.Windows.Forms.Timer RefreshTimer;
         private IContainer Components;
         private Object DataLock = new Object();
