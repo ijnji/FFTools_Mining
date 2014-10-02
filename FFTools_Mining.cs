@@ -11,10 +11,10 @@ namespace FFTools {
         private static MemoryManager TheMemory;
         private static Navigator TheNavigator;
         public static void Main() {
-            // Ready singleton MemoryManager.
             String MineType= "Mature Tree"; //set to desired farming type ex: Mineral Deposit, Mature Tree
             byte[] MineTypeByteArray = Encoding.ASCII.GetBytes(MineType);
 
+            // Ready singleton MemoryManager.
             MemoryManager theMemory = new MemoryManager();
             if (theMemory.initialize() > 0) Environment.Exit(1);
             // Get a first read of Player.
