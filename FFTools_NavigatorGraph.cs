@@ -3,20 +3,21 @@ using System.Collections.Generic;
 
 namespace FFTools {
 	public class NavigatorGraph {
-		public Location [][] NavGraph; //apparently jagged arrays [][] are faster than multidimensional [,]?
-		public
+		enum MoveDirection {NTOS, STON, ETOW, WTOE};
+
+		public Waypoint [][] NavGraph; //apparently jagged arrays [][] are faster than multidimensional [,]?
 
 		public NavigatorGraph (int width, int height) {
-			this.NavGraph = new Location[height][] ;
+			this.NavGraph = new Waypoint[height][] ;
 			for (int y = 0; y < height; y++) {
-				this.NavGraph[y] = new Location[width];
+				this.NavGraph[y] = new Waypoint[width];
 			}
 		}
 
 		public void resize (int newWidth, int newHeight) {
-			Location[][] newGraph = new Location[newHeight][];
+			Waypoint[][] newGraph = new Waypoint[newHeight][];
 			for (int y = 0; y < newHeight; y++) {
-				newGraph[y] = new Location[newWidth];
+				newGraph[y] = new Waypoint[newWidth];
 			}
 			int oldWidth = this.NavGraph[0].Length;
 			int oldHeight = this.NavGraph.Length;
@@ -29,6 +30,10 @@ namespace FFTools {
 				yDestination++;
 			}
 			this.NavGraph = newGraph;
+		}
+
+		public void markObstacle (int x, int y, MoveDirection direction) {
+			this.NavGraph[y][x].
 		}
 	}
 }
