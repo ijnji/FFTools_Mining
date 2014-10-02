@@ -14,6 +14,15 @@ namespace FFTools {
             String MineType= "Mature Tree"; //set to desired farming type ex: Mineral Deposit, Mature Tree
             byte[] MineTypeByteArray = Encoding.ASCII.GetBytes(MineType);
 
+
+            //NavigatorGraph test creation
+            Location one = new Location(1, 2, 3);
+            Location two = new Location(10, 15, 0);
+            Location[] array = {one, two};
+            NavigatorGraph graph = new NavigatorGraph(array);
+            graph.Print();
+            Console.ReadLine();
+
             // Ready singleton MemoryManager.
             MemoryManager theMemory = new MemoryManager();
             if (theMemory.initialize() > 0) Environment.Exit(1);

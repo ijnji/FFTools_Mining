@@ -3,16 +3,19 @@ using System.Collections.Generic;
 
 namespace FFTools {
 	public class NavigatorGraph {
-		private const float DIST_PER_GRID = 5;
-		private const int BUFFER_MULTIPLIER = 3;	//BUFFER_MULTIPLIER * DIST_PER_GRID is buffer space on edges of graph
-		public Waypoint [][] NavGraph; //apparently jagged arrays [][] are faster than multidimensional [,]?
+		private const float DIST_PER_GRID = 1;
+		private const int BUFFER_MULTIPLIER = 0;	//BUFFER_MULTIPLIER * DIST_PER_GRID is buffer space on edges of graph
+		public Waypoint [][] NavGraph = new Waypoint[1][]; //apparently jagged arrays [][] are faster than multidimensional [,]?
 
 		public NavigatorGraph (Location[] locations) {
 			//find dimensions in "in-game" units to hold all locations
 			float totalX = 0, totalY = 0;
 
 			//most extreme "in-game" X, Y coordinates -- used to fill each grid
-			float negX = 0, negY = 0, posX = 0, posY = 0;
+			float negX = float.PositiveInfinity;
+			float negY = float.PositiveInfinity;
+			float posX = float.NegativeInfinity;
+			float posY = float.NegativeInfinity;
 
 			foreach (Location location in locations) {
 				if (location.x < negX) negX = location.x;
@@ -20,7 +23,7 @@ namespace FFTools {
 				if (location.x > posX) posX = location.x;
 				if (location.y > posY) posY = location.y;
 			}
-
+			System.Console.WriteLine("negY: "+negY+" | negX: "+negX+" | posY: "+posY+" | posX: "+posX);
 			//round "in-game" units to nearest DIST_PER_GRID multiple
 			totalX = totalX + DIST_PER_GRID - (totalX % DIST_PER_GRID);
 			totalY = totalY + DIST_PER_GRID - (totalY % DIST_PER_GRID);
@@ -44,9 +47,10 @@ namespace FFTools {
 			else
 				posX = posX - (DIST_PER_GRID - (posX % DIST_PER_GRID));
 
+			System.Console.WriteLine("negY: "+negY+" | negX: "+negX+" | posY: "+posY+" | posX: "+posX);
 			//calculate dimensions in "in-game" units needed and add buffer on all sides
 			totalX = posX - negX + 2*BUFFER_MULTIPLIER*DIST_PER_GRID;
-			totalY = posY - posY + 2*BUFFER_MULTIPLIER*DIST_PER_GRID;
+			totalY = posY - negY + 2*BUFFER_MULTIPLIER*DIST_PER_GRID;
 
 			//# of grid square things
 			int graphWidth = (int) (totalX/DIST_PER_GRID);
@@ -57,18 +61,23 @@ namespace FFTools {
 			for (int y = 0; y < graphHeight; y++) {
 				this.NavGraph[y] = new Waypoint[graphWidth];
 			}
+			System.Console.WriteLine("NavGraph created");
+			System.Console.WriteLine("Height: "+graphHeight+" | Width: "+graphWidth);
 
 			//initial "in-game" coordinates stored in [0][0] = most negative X, most positive Y + buffers applied
-			float graphX = negX - BUFFER_MULTIPLIER*DIST_PER_GRID + DIST_PER_GRID/2;
-			float graphY = posY + BUFFER_MULTIPLIER*DIST_PER_GRID - DIST_PER_GRID/2;
-
+			float graphX = negX + DIST_PER_GRID/2;
+			float graphY = posY - DIST_PER_GRID/2;
+			System.Console.WriteLine("0,0 = "+graphX+", "+ graphY);
+			System.Console.WriteLine("Hit Enter");
+			Console.ReadLine();
 			//fill in all grids
 			for (int y = 0; y < graphHeight; y++) {
+				float tmp_graphX = graphX;
 				for (int x = 0; x < graphWidth; x++) {
-					this.NavGraph[y][x] = new Waypoint (graphX, graphY, 0, true, true, true, true);	//NavGraph Z coordinates aren't used
-					graphX = graphX + DIST_PER_GRID;
+					this.NavGraph[y][x] = new Waypoint(tmp_graphX, graphY, 0, true, true, true, true);	//NavGraph Z coordinates aren't used
+					tmp_graphX = tmp_graphX + DIST_PER_GRID;
 				}
-				graphY = graphY + DIST_PER_GRID;
+				graphY = graphY - DIST_PER_GRID;
 			}
 		}
 
@@ -117,5 +126,30 @@ namespace FFTools {
 			}
 			return false; //not adjacent
 		}
+
+		//print graph contents
+		public void Print() {
+			String line1 = "";
+			String line2 = "";
+			for (int y = 0; y < this.NavGraph.Length; y++) {
+				for (int x = 0; x < this.NavGraph[y].Length; x++) {
+					line1 = line1 + "\t" + this.NavGraph[y][x].location.x.ToString("n1");
+					line2 = line2 + "\t" + this.NavGraph[y][x].location.y.ToString("n1");
+				}
+				System.Console.WriteLine(line1);
+				System.Console.WriteLine(line2);
+				System.Console.WriteLine();
+				line1 = "";
+				line2 = "";
+			}
+		}
+		//public static void Main() {
+		//	Location one = new Location(1, 2, 3);
+		//	Location two = new Location(10, 15, 0);
+		//	Location[] array = {one, two};
+		//	NavigatorGraph graph = new NavigatorGraph(array);
+		//	graph.Print();
+//
+		//}
 	}
 }

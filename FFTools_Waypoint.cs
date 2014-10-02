@@ -5,7 +5,7 @@ namespace FFTools {
 	public enum MoveDirection {NtoS, StoN, EtoW, WtoE};
 	public class Waypoint {
 		//XYZ coordinates
-		public Location location;
+		public Location location = new Location();
 
 		//indicates whether it is possible to travel to location from direction
 		public bool[] canTravelFrom = new bool[4];
