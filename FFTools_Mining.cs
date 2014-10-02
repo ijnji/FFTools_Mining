@@ -45,11 +45,11 @@ namespace FFTools {
                 System.Console.WriteLine("Nearest mineral deposit is at...");
                 md = nearestVisibleMineralDeposit(thePlayer, theMinDepList);
                 System.Console.WriteLine(md);
-                if( findDistanceBetween(thePlayer, md.x, md.y) < 250) { //TODO: fix 250 hack
-                    System.Console.WriteLine("With a distance of " + findDistanceBetween(thePlayer, md.x, md.y));
-                    System.Console.WriteLine("Need to face " + findOrientationRelativeTo(thePlayer, md.x, md.y));
+                if( Location.findDistanceBetween(thePlayer.location, md.location) < 250) { //TODO: fix 250 hack
+                    System.Console.WriteLine("With a distance of " + Location.findDistanceBetween(thePlayer.location, md.location));
+                    System.Console.WriteLine("Need to face " + thePlayer.findOrientationRelativeTo(md.location));
                     System.Console.WriteLine("Traveling to the node...");
-                    travelTo(theMemory, md.x, md.y);
+                    travelTo(theMemory, md.location);
                     mineFrom(theMemory);
                     System.Console.WriteLine("Done with this node!");
                     if (mdHistory.Count > 10) mdHistory.Dequeue();
@@ -58,10 +58,10 @@ namespace FFTools {
                 else {
                     System.Console.WriteLine("No nearby node, moving to previous good node and searching again");
                     md = mdHistory.Dequeue();
-                    System.Console.WriteLine("With a distance of " + findDistanceBetween(thePlayer, md.x, md.y));
-                    System.Console.WriteLine("Need to face " + findOrientationRelativeTo(thePlayer, md.x, md.y));
+                    System.Console.WriteLine("With a distance of " + Location.findDistanceBetween(thePlayer.location, md.location));
+                    System.Console.WriteLine("Need to face " + thePlayer.findOrientationRelativeTo(md.location));
                     System.Console.WriteLine("Traveling to the node...");
-                    travelTo(theMemory, md.x, md.y);
+                    travelTo(theMemory, md.location);
                 }
             }
         }
@@ -84,78 +84,20 @@ namespace FFTools {
             Thread.Sleep(3000);
         }
 
-        // Distance between player and targetx,targety.
-        private static float findDistanceBetween(Player thePlayer, float tx, float ty) {
-            float dx = thePlayer.x - tx;
-            float dy = thePlayer.y - ty;
-            return (float)Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2));
-        }
-
-        // Angle between player and targetx,targety.
-        private static float findAngleBetween(Player thePlayer, float tx, float ty) {
-            float prot = thePlayer.rot;
-            float trot = findOrientationRelativeTo(thePlayer, tx, ty);
-            float drot = Math.Max(prot, trot) - Math.Min(prot, trot);
-            if ( drot <= (float)Math.PI ) {
-                if (prot >= trot) {
-                    return -1 * drot;
-                } else {
-                    return drot;
-                }
-            } else {
-                if (prot >= trot) {
-                    return (float)(2*Math.PI) - drot;
-                } else {
-                    return -1 * ((float)(2*Math.PI) - drot);
-                }
-            }
-        }
-
-        // Orientation player should face to targetx,targety.
-        private static float findOrientationRelativeTo(Player thePlayer, float tx, float ty) {
-            float dx = tx - thePlayer.x;
-            float dy = ty - thePlayer.y;
-            if (dy > 0) {
-                if (dx > 0) {
-                    return (float)Math.Atan(dx/dy);
-                } else if (dx < 0) {
-                    return 0 - (float)Math.Atan(-dx/dy);
-                } else {
-                    return 0;
-                }
-            } else if (dy < 0) {
-                if (dx > 0) {
-                    return (float)(Math.PI/2) + (float)Math.Atan(-dy/dx); 
-                } else if (dx < 0) {
-                    return 0 - (float)(Math.PI/2) - (float)Math.Atan(dy/dx);
-                } else {
-                    return (float)3.140;
-                }
-            } else {
-                if (dx > 0) {
-                    return (float)(Math.PI/2);
-                } else if (dx < 0) {
-                    return 0 - (float)(Math.PI/2);
-                } else {
-                    return 0;
-                }
-            }
-        }
-
-        private static void travelTo(MemoryManager theMemory, float tx, float ty) {
+        private static void travelTo(MemoryManager theMemory, Location tLocation) {
             Player thePlayer = theMemory.readPlayer();
             
-            if ( findAngleBetween(thePlayer, tx, ty) > 0.1 ) {
+            if ( thePlayer.findAngleBetween(tLocation) > 0.1 ) {
                 theMemory.sendKeyDownMsg(Keys.A);
-                while ( findAngleBetween(thePlayer, tx, ty) > 0.1 ) {
+                while ( thePlayer.findAngleBetween(tLocation) > 0.1 ) {
                     Thread.Sleep(50);
                     thePlayer = theMemory.readPlayer();
                 }
                 theMemory.sendKeyUpMsg(Keys.A);
             }
-            if ( findAngleBetween(thePlayer, tx, ty) < -0.1 ) {
+            if ( thePlayer.findAngleBetween(tLocation) < -0.1 ) {
                 theMemory.sendKeyDownMsg(Keys.D);
-                while ( findAngleBetween(thePlayer, tx, ty) < -0.1 ) {
+                while ( thePlayer.findAngleBetween(tLocation) < -0.1 ) {
                     Thread.Sleep(50);
                     thePlayer = theMemory.readPlayer();
                 }
@@ -165,15 +107,15 @@ namespace FFTools {
             bool rotating_left = false;
             bool rotating_right = false;
             thePlayer = theMemory.readPlayer();
-            while ( findDistanceBetween(thePlayer, tx, ty) > 2.0 ) {
+            while ( Location.findDistanceBetween(thePlayer.location, tLocation) > 2.0 ) {
                 theMemory.sendKeyDownMsg(Keys.W);
-                while ( findDistanceBetween(thePlayer, tx, ty) > 2.0 ) {
+                while ( Location.findDistanceBetween(thePlayer.location, tLocation) > 2.0 ) {
                     Thread.Sleep(50);
                     thePlayer = theMemory.readPlayer();
-                    if ( findAngleBetween(thePlayer, tx, ty) > 0.1 ) {
+                    if ( thePlayer.findAngleBetween(tLocation) > 0.1 ) {
                         theMemory.sendKeyDownMsg(Keys.A);
                         rotating_left = true;
-                    } else if ( findAngleBetween(thePlayer, tx, ty) < -0.1 ) {
+                    } else if ( thePlayer.findAngleBetween(tLocation) < -0.1 ) {
                         theMemory.sendKeyDownMsg(Keys.D);
                         rotating_right = true;
                     } else if ( rotating_left ) {
@@ -188,17 +130,17 @@ namespace FFTools {
             }
 
             thePlayer = theMemory.readPlayer();
-            if ( findAngleBetween(thePlayer, tx, ty) > 0.1 ) {
+            if ( thePlayer.findAngleBetween(tLocation) > 0.1 ) {
                 theMemory.sendKeyDownMsg(Keys.A);
-                while ( findAngleBetween(thePlayer, tx, ty) > 0.1 ) {
+                while ( thePlayer.findAngleBetween(tLocation) > 0.1 ) {
                     Thread.Sleep(50);
                     thePlayer = theMemory.readPlayer();
                 }
                 theMemory.sendKeyUpMsg(Keys.A);
             }
-            if ( findAngleBetween(thePlayer, tx, ty) < -0.1 ) {
+            if ( thePlayer.findAngleBetween(tLocation) < -0.1 ) {
                 theMemory.sendKeyDownMsg(Keys.D);
-                while ( findAngleBetween(thePlayer, tx, ty) < -0.1 ) {
+                while ( thePlayer.findAngleBetween(tLocation) < -0.1 ) {
                     Thread.Sleep(50);
                     thePlayer = theMemory.readPlayer();
                 }
@@ -214,7 +156,7 @@ namespace FFTools {
             MineralDeposit nearestMineralDeposit = null;
             float nearestMineralDepositDistance = Single.MaxValue;
             foreach (MineralDeposit md in visibleList) {
-                float distance = findDistanceBetween(thePlayer, md.x, md.y);
+                float distance = Location.findDistanceBetween(thePlayer.location, md.location);
                 if (distance < nearestMineralDepositDistance) {
                     nearestMineralDepositDistance = distance;
                     nearestMineralDeposit = md;
