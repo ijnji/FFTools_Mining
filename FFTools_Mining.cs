@@ -8,34 +8,42 @@ using System.Windows.Forms;
 
 namespace FFTools {
     public class Mining {
+        private static MemoryManager TheMemory;
+        private static Navigator TheNavigator;
         public static void Main() {
             // Ready singleton MemoryManager.
-            MemoryManager theMemory = new MemoryManager();
-            if (theMemory.initialize() > 0) Environment.Exit(1);
+            TheMemory = new MemoryManager();
+            if (TheMemory.initialize() > 0) Environment.Exit(1);
             // Get a first read of Player.
-            Player thePlayer = theMemory.readPlayer();
+            Player thePlayer = TheMemory.readPlayer();
             System.Console.WriteLine(thePlayer);
+            // Ready singleton Navigator.
+            TheNavigator = new Navigator(TheMemory);
             // Get a first read of Gen Diag.
-            List<string> theGenDiagList = theMemory.readGeneralDialogueList();
+            List<string> theGenDiagList = TheMemory.readGeneralDialogueList();
             // Get a first read of Mineral Deposits.
-            //List<MineralDeposit> theMinDepList = theMemory.readMineralDepositList();
-                List<MineralDeposit> theMinDepList = new List<MineralDeposit>();
-                theMinDepList.Add(new MineralDeposit(false, (float)205.1436, 0, (float)-83.35779));
-                theMinDepList.Add(new MineralDeposit(false, (float)216.1513, 0, (float)-87.30682));
-                theMinDepList.Add(new MineralDeposit(false, (float)221.7113, 0, (float)-95.18837));
-                theMinDepList.Add(new MineralDeposit(false, (float)225.8484, 0, (float)-106.7841));
-                theMinDepList.Add(new MineralDeposit(false, (float)256.3488, 0, (float)-215.9667));
-                theMinDepList.Add(new MineralDeposit(false, (float)262.8185, 0, (float)-170.5062));
-                theMinDepList.Add(new MineralDeposit(false, (float)274.6811, 0, (float)-247.5));
-                theMinDepList.Add(new MineralDeposit(false, (float)286.9102, 0, (float)-252.5938));
-                theMinDepList.Add(new MineralDeposit(false, (float)317.0013, 0, (float)-178.881));
-                theMinDepList.Add(new MineralDeposit(false, (float)323.3648, 0, (float)-182.2007));
-                theMinDepList.Add(new MineralDeposit(false, (float)325.8448, 0, (float)-265.9896));
-                theMinDepList.Add(new MineralDeposit(false, (float)333.5263, 0, (float)-214.3547));
-                theMinDepList.Add(new MineralDeposit(false, (float)334.8407, 0, (float)-242.5161));
-                theMinDepList.Add(new MineralDeposit(true , (float)332.7316, 0, (float)-256.8401));
-                theMinDepList.Add(new MineralDeposit(true, (float)261.0139, 0, (float)-202.0589));
-                theMinDepList.Add(new MineralDeposit(true, (float)291.211, 0, (float)-255.4915));
+            //List<MineralDeposit> theMinDepList = TheMemory.readMineralDepositList();
+
+            // --- Test case Mineral Deposits ---
+            List<MineralDeposit> theMinDepList = new List<MineralDeposit>();
+            theMinDepList.Add(new MineralDeposit(false, (float)205.1436, 0, (float)-83.35779));
+            theMinDepList.Add(new MineralDeposit(false, (float)216.1513, 0, (float)-87.30682));
+            theMinDepList.Add(new MineralDeposit(false, (float)221.7113, 0, (float)-95.18837));
+            theMinDepList.Add(new MineralDeposit(false, (float)225.8484, 0, (float)-106.7841));
+            theMinDepList.Add(new MineralDeposit(false, (float)256.3488, 0, (float)-215.9667));
+            theMinDepList.Add(new MineralDeposit(false, (float)262.8185, 0, (float)-170.5062));
+            theMinDepList.Add(new MineralDeposit(false, (float)274.6811, 0, (float)-247.5));
+            theMinDepList.Add(new MineralDeposit(false, (float)286.9102, 0, (float)-252.5938));
+            theMinDepList.Add(new MineralDeposit(false, (float)317.0013, 0, (float)-178.881));
+            theMinDepList.Add(new MineralDeposit(false, (float)323.3648, 0, (float)-182.2007));
+            theMinDepList.Add(new MineralDeposit(false, (float)325.8448, 0, (float)-265.9896));
+            theMinDepList.Add(new MineralDeposit(false, (float)333.5263, 0, (float)-214.3547));
+            theMinDepList.Add(new MineralDeposit(false, (float)334.8407, 0, (float)-242.5161));
+            theMinDepList.Add(new MineralDeposit(true , (float)332.7316, 0, (float)-256.8401));
+            theMinDepList.Add(new MineralDeposit(true, (float)261.0139, 0, (float)-202.0589));
+            theMinDepList.Add(new MineralDeposit(true, (float)291.211, 0, (float)-255.4915));
+            // --- Test case Mineral Deposits ---
+
             foreach (MineralDeposit md in theMinDepList) {
                 System.Console.WriteLine(md);
             }
@@ -43,22 +51,22 @@ namespace FFTools {
             GraphForm theGraphForm = new GraphForm();
             Thread formStartThread = new Thread(new ParameterizedThreadStart(formStart));
             formStartThread.Start(theGraphForm);
-
+            
             theGraphForm.setViewMinDepList(theMinDepList);
 
-            //while (true) {
-            //    List<MineralDeposit> theMinDepList = theMemory.readMineralDepositList();
-            //    System.Console.WriteLine("-------");
-            //    System.Console.WriteLine("Nearest mineral deposit is at...");
-            //    MineralDeposit md = nearestVisibleMineralDeposit(thePlayer, theMinDepList);
-            //    System.Console.WriteLine(md);
-            //    System.Console.WriteLine("With a distance of " + findDistanceBetween(thePlayer, md.x, md.y));
-            //    System.Console.WriteLine("Need to face " + findOrientationRelativeTo(thePlayer, md.x, md.y));
-            //    System.Console.WriteLine("Traveling to the node...");
-            //    travelTo(theMemory, md.x, md.y);
-            //    mineFrom(theMemory);
-            //    System.Console.WriteLine("Done with this node!");
-            //}
+            while (true) {
+                //List<MineralDeposit> theMinDepList = TheMemory.readMineralDepositList();
+                //System.Console.WriteLine("-------");
+                //System.Console.WriteLine("Nearest mineral deposit is at...");
+                //MineralDeposit md = nearestVisibleMineralDeposit(thePlayer, theMinDepList);
+                //System.Console.WriteLine(md);
+                //System.Console.WriteLine("With a distance of " + findDistanceBetween(thePlayer, md.x, md.y));
+                //System.Console.WriteLine("Need to face " + findOrientationRelativeTo(thePlayer, md.x, md.y));
+                //System.Console.WriteLine("Traveling to the node...");
+                //travelTo(TheMemory, md.x, md.y);
+                //mineFrom(theMemory);
+                //System.Console.WriteLine("Done with this node!");                
+            }
         }
 
         private static void formStart(Object theGraphForm) {
