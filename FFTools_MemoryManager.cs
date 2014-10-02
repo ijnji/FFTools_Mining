@@ -43,17 +43,17 @@ namespace FFTools {
         private const int ADDR_OFF_PLAYERZ = 0x4;
         private const int ADDR_OFF_PLAYERY = 0x8;
         private const int ADDR_OFF_PLAYERROT = 0x10;
-        private const int ADDR_OFF_MINDEPVIS = 0xC8;
-        private const int ADDR_OFF_MINDEPX = 0x70;
-        private const int ADDR_OFF_MINDEPZ = 0x74;
-        private const int ADDR_OFF_MINDEPY = 0x78;
+        private const int ADDR_OFF_GATHNODEVIS = 0xC8;
+        private const int ADDR_OFF_GATHNODEX = 0x70;
+        private const int ADDR_OFF_GATHNODEZ = 0x74;
+        private const int ADDR_OFF_GATHNODEY = 0x78;
 
         // Other constants.
         private int[] GENDIAG_STARTPATTERN = {0x02, 0x13, 0x06, 0x100, 0x100, 0x100, 0x100, 0x100, 0x03};
         private int[] GENDIAG_ENDPATTERN = {0x02, 0x13, 0x02, 0xEC, 0x03, 0x0D};
         private int FISHBITE_BITE = 0x1;
-        private const int MINDEP_VIS = 0x0;
-        private const int MINDEP_INVIS = 0x80;        
+        private const int GATHNODE_VIS = 0x0;
+        private const int GATHNODE_INVIS = 0x80;        
 
         // Address bases.
         private Process Proc = null;
@@ -256,19 +256,19 @@ namespace FFTools {
             else return false;
         }
 
-        public List<MineralDeposit> readMineralDepositList(List<IntPtr> Addresses) {
-            List<MineralDeposit> mdlist = new List<MineralDeposit>();
+        public List<GatheringNode> readGatheringNodeList(List<IntPtr> Addresses) {
+            List<GatheringNode> mdlist = new List<GatheringNode>();
             foreach (IntPtr mdaddr in Addresses) {
-                bool vis = (readProcInt(IntPtr.Add(mdaddr, ADDR_OFF_MINDEPVIS)) == MINDEP_VIS) ? true : false;
-                float mdx = readProcFloat(IntPtr.Add(mdaddr, ADDR_OFF_MINDEPX));
-                float mdz = readProcFloat(IntPtr.Add(mdaddr, ADDR_OFF_MINDEPZ));
-                float mdy = readProcFloat(IntPtr.Add(mdaddr, ADDR_OFF_MINDEPY));
-                mdlist.Add(new MineralDeposit(vis, mdx, mdz, mdy));
+                bool vis = (readProcInt(IntPtr.Add(mdaddr, ADDR_OFF_GATHNODEVIS)) == GATHNODE_VIS) ? true : false;
+                float mdx = readProcFloat(IntPtr.Add(mdaddr, ADDR_OFF_GATHNODEX));
+                float mdz = readProcFloat(IntPtr.Add(mdaddr, ADDR_OFF_GATHNODEZ));
+                float mdy = readProcFloat(IntPtr.Add(mdaddr, ADDR_OFF_GATHNODEY));
+                mdlist.Add(new GatheringNode(vis, mdx, mdz, mdy));
             }
             return mdlist;
         }
 
-        public List <IntPtr> findAddresses (byte[] Stuff) {
+        public List <IntPtr> findAddressesOfBytes (byte[] bytesToFind) {
         //Find visible nodes
             //System.Console.WriteLine("finding addresses of stuff");
             long PROC_VM_SIZE = this.Proc.VirtualMemorySize64;
@@ -300,13 +300,13 @@ namespace FFTools {
                     int i = 0;
                     while (i < (int) mem_basic_info.RegionSize) {
                         int p = 0;
-                        while (buffer[i] == Stuff[p]) {
+                        while (buffer[i] == bytesToFind[p]) {
                             i++; p++;
-                            if ((p >= Stuff.Length) || (i >= (int) mem_basic_info.RegionSize)) break;
+                            if ((p >= bytesToFind.Length) || (i >= (int) mem_basic_info.RegionSize)) break;
                         }
-                        if (p == Stuff.Length) {
-                            StuffAddress = address + i - Stuff.Length;
-                            //System.Console.WriteLine("Stuff Found! " + StuffAddress.ToString("X8"));
+                        if (p == bytesToFind.Length) {
+                            StuffAddress = address + i - bytesToFind.Length;
+                            //System.Console.WriteLine("bytesToFind Found! " + StuffAddress.ToString("X8"));
                             Addresses.Add(StuffAddress);
                         }
                         i++;
