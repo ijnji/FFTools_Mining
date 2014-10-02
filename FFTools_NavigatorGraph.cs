@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 
 namespace FFTools {
-	public class NavigationGraph {
+	public class NavigatorGraph {
 		public Location [][] NavGraph; //apparently jagged arrays [][] are faster than multidimensional [,]?
+		public
 
-		public NavigationGraph (int width, int height) {
-			NavGraph = new Location[height][] ;
+		public NavigatorGraph (int width, int height) {
+			this.NavGraph = new Location[height][] ;
 			for (int y = 0; y < height; y++) {
-				NavGraph[y] = new Location[width];
+				this.NavGraph[y] = new Location[width];
 			}
 		}
 
@@ -17,17 +18,17 @@ namespace FFTools {
 			for (int y = 0; y < newHeight; y++) {
 				newGraph[y] = new Location[newWidth];
 			}
-			int oldWidth = NavGraph[0].Length;
-			int oldHeight = NavGraph.Length;
+			int oldWidth = this.NavGraph[0].Length;
+			int oldHeight = this.NavGraph.Length;
 
 			int yDestination = (newHeight - oldHeight)/2;
 			int xDestination = (newWidth - oldWidth)/2;
 
-			for (int y = 0; y < NavGraph.Length; y++) {
+			for (int y = 0; y < this.NavGraph.Length; y++) {
 				Array.Copy(NavGraph[y], 0, newGraph[yDestination], xDestination, oldWidth);
 				yDestination++;
 			}
-			NavGraph = newGraph;
+			this.NavGraph = newGraph;
 		}
 	}
 }
