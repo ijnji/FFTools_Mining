@@ -173,23 +173,27 @@ namespace FFTools {
             if (fromY == toY) { //EtoW or WtoE
                 int xDir = fromX - toX;
                 if(Math.Abs(xDir) > 1) return false; //not adjacent
-                if(xDir == 0) return true;             //same coordinates, technically true
+                if(xDir == 0) return true;           //same coordinates, technically true
                 if(xDir > 0)     //EtoW
                     return this.NavGraph[toY][toX].canTravelFrom[(int)MoveDirection.EtoW];
-                else            //WtoE
+                else             //WtoE
                     return this.NavGraph[toY][toX].canTravelFrom[(int)MoveDirection.WtoE];
             }
 
-            if (fromX == toX) { //NtoS or NtoS
+            if (fromX == toX) { //NtoS or StoN
                 int yDir = fromY - toY;
                 if(Math.Abs(yDir) > 1) return false; //not adjacent
-                if(yDir == 0) return true;             //same coordinates, technically true
+                if(yDir == 0) return true;           //same coordinates, technically true
                 if(yDir > 0)     //StoN
                     return this.NavGraph[toY][toX].canTravelFrom[(int)MoveDirection.StoN];
-                else            //NtoS
+                else             //NtoS
                     return this.NavGraph[toY][toX].canTravelFrom[(int)MoveDirection.NtoS];
             }
             return false; //not adjacent
+        }
+
+        public List <Locations> findPath (Location start, Location end) {
+
         }
 
         //print graph contents
@@ -211,6 +215,32 @@ namespace FFTools {
                 line1 = "";
                 line2 = "";
             }
+        }
+
+        public static void Main() {
+        	
+            //NavigatorGraph test creation
+            Location one = new Location(1, 1, 0);
+            Location two = new Location(4, 4, 0);
+            Location three = new Location(3, 2, 0);
+            Location four = new Location(4, 8, 0);
+            Location five = new Location(-2, -2, 0);
+            Location[] array = {one, two};
+            Location[] array2 = {three};
+            Location[] array3 = {four, five};
+            NavigatorGraph graph = new NavigatorGraph();
+            graph.addLocations(array);
+            graph.Print();
+            Console.ReadLine();
+            System.Console.WriteLine("adding location that should already be covered");
+            graph.addLocations(array2);
+            graph.Print();
+            Console.ReadLine();
+            System.Console.WriteLine("adding locations that are not already covered");
+            graph.addLocations(array3);
+            graph.Print();
+            Console.ReadLine();
+
         }
     }
 }
