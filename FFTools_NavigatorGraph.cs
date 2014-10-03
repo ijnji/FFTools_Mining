@@ -6,51 +6,51 @@ namespace FFTools {
 		private const float DIST_PER_GRID = 1;
 		private const int BUFFER_MULTIPLIER = 0;	//BUFFER_MULTIPLIER * DIST_PER_GRID is buffer space on edges of graph
 		public Waypoint [][] NavGraph = new Waypoint[1][]; //apparently jagged arrays [][] are faster than multidimensional [,]?
+		
+		//min/max "in game" coordinates represented -- rounded to nearest multiple of DIST_PER_GRID
+		public float minX = float.PositiveInfinity;
+		public float minY = float.PositiveInfinity;
+		public float maxX = float.NegativeInfinity;
+		public float maxY = float.NegativeInfinity;
 
 		public NavigatorGraph (Location[] locations) {
 			//find dimensions in "in-game" units to hold all locations
 			float totalX = 0, totalY = 0;
 
-			//most extreme "in-game" X, Y coordinates -- used to fill each grid
-			float minX = float.PositiveInfinity;
-			float minY = float.PositiveInfinity;
-			float maxX = float.NegativeInfinity;
-			float maxY = float.NegativeInfinity;
-
 			foreach (Location location in locations) {
-				if (location.x < minX) minX = location.x;
-				if (location.y < minY) minY = location.y;
-				if (location.x > maxX) maxX = location.x;
-				if (location.y > maxY) maxY = location.y;
+				if (location.x < this.minX) this.minX = location.x;
+				if (location.y < this.minY) this.minY = location.y;
+				if (location.x > this.maxX) this.maxX = location.x;
+				if (location.y > this.maxY) this.maxY = location.y;
 			}
-			System.Console.WriteLine("minY: "+minY+" | minX: "+minX+" | maxY: "+maxY+" | maxX: "+maxX);
+			System.Console.WriteLine("minY: "+ this.minY +" | minX: "+ this.minX + " | maxY: "+ this.maxY + " | maxX: " + this.maxX);
 			//round "in-game" units to nearest DIST_PER_GRID multiple
 			totalX = totalX + DIST_PER_GRID - (totalX % DIST_PER_GRID);
 			totalY = totalY + DIST_PER_GRID - (totalY % DIST_PER_GRID);
-			if(minY > 0)
-				minY = minY - (minY % DIST_PER_GRID);
+			if(this.minY > 0)
+				this.minY = this.minY - (this.minY % DIST_PER_GRID);
 			else
-				minY = minY - (DIST_PER_GRID - (minY % DIST_PER_GRID));
+				this.minY = this.minY - (DIST_PER_GRID - (this.minY % DIST_PER_GRID));
 
-			if(minX > 0)
-				minX = minX - (minX % DIST_PER_GRID);
+			if(this.minX > 0)
+				this.minX = this.minX - (this.minX % DIST_PER_GRID);
 			else
-				minX = minX - (DIST_PER_GRID - (minX % DIST_PER_GRID));
+				this.minX = this.minX - (DIST_PER_GRID - (this.minX % DIST_PER_GRID));
 
-			if(maxY > 0)
-				maxY = maxY - (maxY % DIST_PER_GRID);
+			if(this.maxY > 0)
+				this.maxY = this.maxY - (this.maxY % DIST_PER_GRID);
 			else
-				maxY = maxY - (DIST_PER_GRID - (maxY % DIST_PER_GRID));
+				this.maxY = this.maxY - (DIST_PER_GRID - (this.maxY % DIST_PER_GRID));
 
-			if(maxX > 0)
-				maxX = maxX - (maxX % DIST_PER_GRID);
+			if(this.maxX > 0)
+				this.maxX = this.maxX - (this.maxX % DIST_PER_GRID);
 			else
-				maxX = maxX - (DIST_PER_GRID - (maxX % DIST_PER_GRID));
+				this.maxX = this.maxX - (DIST_PER_GRID - (this.maxX % DIST_PER_GRID));
 
-			System.Console.WriteLine("minY: "+minY+" | minX: "+minX+" | maxY: "+maxY+" | maxX: "+maxX);
+			System.Console.WriteLine("minY: "+ this.minY + " | minX: " + this.minX + " | maxY: " + this.maxY + " | maxX: " + this.maxX);
 			//calculate dimensions in "in-game" units needed and add buffer on all sides
-			totalX = maxX - minX + 2*BUFFER_MULTIPLIER*DIST_PER_GRID;
-			totalY = maxY - minY + 2*BUFFER_MULTIPLIER*DIST_PER_GRID;
+			totalX = this.maxX - this.minX + 2*BUFFER_MULTIPLIER*DIST_PER_GRID;
+			totalY = this.maxY - this.minY + 2*BUFFER_MULTIPLIER*DIST_PER_GRID;
 
 			//# of grid square things
 			int graphWidth = (int) (totalX/DIST_PER_GRID);
@@ -65,8 +65,8 @@ namespace FFTools {
 			System.Console.WriteLine("Height: "+graphHeight+" | Width: "+graphWidth);
 
 			//initial "in-game" coordinates stored in [0][0] = most negative X, most positive Y + buffers applied
-			float graphX = minX + DIST_PER_GRID/2;
-			float graphY = maxY - DIST_PER_GRID/2;
+			float graphX = this.minX + DIST_PER_GRID/2;
+			float graphY = this.maxY - DIST_PER_GRID/2;
 			System.Console.WriteLine("0,0 = "+graphX+", "+ graphY);
 			System.Console.WriteLine("Hit Enter");
 			Console.ReadLine();
@@ -82,30 +82,20 @@ namespace FFTools {
 		}
 		//returns true/false if location exists 
 		public bool findLocation (Location location) {
-			float minX = NavGraph[0][0].location.x - DIST_PER_GRID/2;
-			float maxY = NavGraph[0][0].location.y + DIST_PER_GRID/2;
-			float maxX = NavGraph[NavGraph.Length][NavGraph[0].Length].location.x + DIST_PER_GRID/2;
-			float maxY = NavGraph[NavGraph.Length][NavGraph[0].Length].location.y - DIST_PER_GRID/2;
-
-			if ((location.x >= minX) && (location.x <= maxX)
-					&& (location.y >= minY) && (location.y <= maxY)){
+			if ((location.x >= this.minX) && (location.x <= this.maxX)
+					&& (location.y >= this.minY) && (location.y <= this.maxY)){
 				return true;
 			}
 			return false;
 		}
-		//overloadded findLocation to also write out X/Y indices if found
+		//overloaded findLocation to also write out X/Y indices if found
 		public bool findLocation (Location location, out int x, out int y) {
 			int x = -1, y = -1;
-			float minX = NavGraph[0][0].location.x - DIST_PER_GRID/2;
-			float maxY = NavGraph[0][0].location.y + DIST_PER_GRID/2;
-			float maxX = NavGraph[NavGraph.Length][NavGraph[0].Length].location.x + DIST_PER_GRID/2;
-			float maxY = NavGraph[NavGraph.Length][NavGraph[0].Length].location.y - DIST_PER_GRID/2;
-
-			if ((location.x >= minX) && (location.x <= maxX)
-					&& (location.y >= minY) && (location.y <= maxY)) {
-				float tmp = location.x - minX;
+			if ((location.x >= this.minX) && (location.x <= this.maxX)
+					&& (location.y >= this.minY) && (location.y <= this.maxY)) {
+				float tmp = location.x - this.minX;
 				x = (int) tmp/DIST_PER_GRID;
-				tmp = maxY - location.y;
+				tmp = this.maxY - location.y;
 				y = (int) tmp/DIST_PER_GRID;
 				return true;
 			}
@@ -114,8 +104,28 @@ namespace FFTools {
 
 		public void markObstacle (Location location, MoveDirection direction) {
 			int x, y;
-			this.NavGraph.findLocation(location, x, y);
-			this.NavGraph[y][x].canTravelFrom[(int) direction] = false;
+			if (this.NavGraph.findLocation(location, x, y))
+				this.NavGraph[y][x].canTravelFrom[(int) direction] = false;
+			else
+				System.Console.WriteLine("Obstacle unmarkable, does not exist in graph: " + location.ToString());
+		}
+	
+		public void resize (int newWidth, int newHeight) {
+			Waypoint[][] newGraph = new Waypoint[newHeight][];
+			for (int y = 0; y < newHeight; y++) {
+				newGraph[y] = new Waypoint[newWidth];
+			}
+			int oldWidth = this.NavGraph[0].Length;
+			int oldHeight = this.NavGraph.Length;
+
+			int yDestination = (newHeight - oldHeight)/2;
+			int xDestination = (newWidth - oldWidth)/2;
+
+			for (int y = 0; y < this.NavGraph.Length; y++) {
+				Array.Copy(NavGraph[y], 0, newGraph[yDestination], xDestination, oldWidth);
+				yDestination++;
+			}
+			this.NavGraph = newGraph;
 		}
 
 		//from and to coordinates should be adjacent
