@@ -14,10 +14,24 @@ namespace FFTools {
 
 
             //NavigatorGraph test creation
-            Location one = new Location(1, 2, 3);
-            Location two = new Location(10, 15, 0);
+            Location one = new Location(1, 1, 0);
+            Location two = new Location(4, 4, 0);
+            Location three = new Location(3, 2, 0);
+            Location four = new Location(4, 8, 0);
+            Location five = new Location(-2, -2, 0);
             Location[] array = {one, two};
-            NavigatorGraph graph = new NavigatorGraph(array);
+            Location[] array2 = {three};
+            Location[] array3 = {four, five};
+            NavigatorGraph graph = new NavigatorGraph();
+            graph.addLocations(array);
+            graph.Print();
+            Console.ReadLine();
+            System.Console.WriteLine("adding location that should already be covered");
+            graph.addLocations(array2);
+            graph.Print();
+            Console.ReadLine();
+            System.Console.WriteLine("adding locations that are not already covered");
+            graph.addLocations(array3);
             graph.Print();
             Console.ReadLine();
 
