@@ -192,8 +192,10 @@ namespace FFTools {
             return false; //not adjacent
         }
 
-        public List <Locations> findPath (Location start, Location end) {
+        public List <Location> findPath (Location start, Location end) {
+        	List <Location> path = new List <Location> ();
 
+        	return path;
         }
 
         //print graph contents
@@ -218,7 +220,7 @@ namespace FFTools {
         }
 
         public static void Main() {
-        	
+
             //NavigatorGraph test creation
             Location one = new Location(1, 1, 0);
             Location two = new Location(4, 4, 0);
