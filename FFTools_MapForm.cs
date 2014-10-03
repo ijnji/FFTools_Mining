@@ -6,7 +6,7 @@ using System.Threading;
 using System.Windows.Forms;
 
 namespace FFTools {
-    public class GraphForm : Form {
+    public class MapForm : Form {
         // Unit conversion constants.
         private const int BITMAP_SIZE_IN_PIXELS = 2000;
         private const int BITMAP_OFFSET_TO_ORIGIN = BITMAP_SIZE_IN_PIXELS / 2;
@@ -21,16 +21,16 @@ namespace FFTools {
         private const int GRID_COLOR_LINES_R = 0x30;
         private const int GRID_COLOR_LINES_G = 0x30;
         private const int GRID_COLOR_LINES_B = 0x30;
-        private const int GRID_COLOR_MINDEP_R = 0xF0;
-        private const int GRID_COLOR_MINDEP_G = 0xF0;
-        private const int GRID_COLOR_MINDEP_B = 0xFF;
+        private const int GRID_COLOR_GATHNODE_R = 0xF0;
+        private const int GRID_COLOR_GATHNODE_G = 0xF0;
+        private const int GRID_COLOR_GATHNODE_B = 0xFF;
 
         private System.Windows.Forms.Timer RefreshTimer;
         private IContainer Components;
         private Object DataLock = new Object();
         private Player ViewPlayer;
-        private List<MineralDeposit> ViewMinDepList;
-        public GraphForm() {
+        private List<GatheringNode> ViewGathNodeList;
+        public MapForm() {
             InitializeComponent();
             this.SetStyle(ControlStyles.UserPaint, true);
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
@@ -38,7 +38,7 @@ namespace FFTools {
             this.SetStyle(ControlStyles.SupportsTransparentBackColor, true);
             this.Size = new Size(500, 500);
             //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            ViewMinDepList = new List<MineralDeposit>();
+            ViewGathNodeList = new List<GatheringNode>();
             ViewPlayer = new Player(0, 0, 0, 0);
         }
         public void InitializeComponent() {
@@ -68,17 +68,17 @@ namespace FFTools {
             gBmp.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
 
             // Grab a copy of semaphored view data.
-            List<MineralDeposit> tmpViewMinDepList = new List<MineralDeposit>();
+            List<GatheringNode> tmpViewGathNodeList = new List<GatheringNode>();
             Player tmpViewPlayer;
             lock (DataLock) {
-                foreach (MineralDeposit vmd in ViewMinDepList) {
-                    tmpViewMinDepList.Add(new MineralDeposit(vmd.vis, vmd.x, vmd.z, vmd.y));
+                foreach (GatheringNode vgn in ViewGathNodeList) {
+                    tmpViewGathNodeList.Add(new GatheringNode(vgn.vis, vgn.location));
                 }
-                tmpViewPlayer = new Player(ViewPlayer.x, ViewPlayer.z, ViewPlayer.y, ViewPlayer.rot);
+                tmpViewPlayer = new Player(ViewPlayer.location, ViewPlayer.rot);
             }
 
             paintGrid(gBmp);
-            paintMineralDeposits(gBmp, tmpViewMinDepList);
+            paintGatheringNodes(gBmp, tmpViewGathNodeList);
             paintPlayer(gBmp, tmpViewPlayer);
             //paintText(gBmp);
 
@@ -90,11 +90,11 @@ namespace FFTools {
             float botrighx = -BITMAP_OFFSET_TO_ORIGIN / GRID_PIXELS_PER_ILMS;
             float botrighy = BITMAP_OFFSET_TO_ORIGIN / GRID_PIXELS_PER_ILMS;
 
-            foreach (MineralDeposit tvmd in tmpViewMinDepList) {
-                if (tvmd.x < topleftx) topleftx = tvmd.x;
-                if (tvmd.y > toplefty) toplefty = tvmd.y;
-                if (tvmd.x > botrighx) botrighx = tvmd.x;
-                if (tvmd.y < botrighy) botrighy = tvmd.y;
+            foreach (GatheringNode tvgn in tmpViewGathNodeList) {
+                if (tvgn.location.x < topleftx) topleftx = tvgn.location.x;
+                if (tvgn.location.y > toplefty) toplefty = tvgn.location.y;
+                if (tvgn.location.x > botrighx) botrighx = tvgn.location.x;
+                if (tvgn.location.y < botrighy) botrighy = tvgn.location.y;
             }
 
             int bitmaptopleftx = (int)Math.Round(topleftx * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN;
@@ -140,21 +140,21 @@ namespace FFTools {
             }
             gridPen.Dispose();
         }
-        private void paintMineralDeposits(Graphics gBmp, List<MineralDeposit> tmpViewMinDepList) {
-            SolidBrush mdBrush = new SolidBrush(Color.FromArgb(GRID_COLOR_MINDEP_R,
-                                                               GRID_COLOR_MINDEP_G,
-                                                               GRID_COLOR_MINDEP_B));
-            foreach (MineralDeposit tvmd in tmpViewMinDepList) {
-                gBmp.FillEllipse(mdBrush, 
-                    (int)Math.Round(tvmd.x * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN, 
-                     BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(tvmd.y * GRID_PIXELS_PER_ILMS),
+        private void paintGatheringNodes(Graphics gBmp, List<GatheringNode> tmpViewGathNodeList) {
+            SolidBrush gnBrush = new SolidBrush(Color.FromArgb(GRID_COLOR_GATHNODE_R,
+                                                               GRID_COLOR_GATHNODE_G,
+                                                               GRID_COLOR_GATHNODE_B));
+            foreach (GatheringNode tvgn in tmpViewGathNodeList) {
+                gBmp.FillEllipse(gnBrush, 
+                    (int)Math.Round(tvgn.location.x * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN, 
+                     BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(tvgn.location.y * GRID_PIXELS_PER_ILMS),
                     4, 4);
             }
         }
         private void paintPlayer(Graphics gBmp, Player tmpViewPlayer) {
             gBmp.FillEllipse(Brushes.Crimson,
-                (int)Math.Round(tmpViewPlayer.x * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN,
-                BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(tmpViewPlayer.y * GRID_PIXELS_PER_ILMS),
+                (int)Math.Round(tmpViewPlayer.location.x * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN,
+                BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(tmpViewPlayer.location.y * GRID_PIXELS_PER_ILMS),
                 6, 6);
         }
         private void paintText(Graphics gBmp) {
@@ -163,20 +163,17 @@ namespace FFTools {
 
             gBmp.DrawString("Test", labelFont, labelBrush, new PointF(80F, 80F));
         }
-        public void setViewMinDepList(List<MineralDeposit> newMinDepList) {
+        public void setViewGathNodeList(List<GatheringNode> newGathNodeList) {
             lock (DataLock) {
-                ViewMinDepList.Clear();
-                foreach (MineralDeposit md in newMinDepList) {
-                    ViewMinDepList.Add(new MineralDeposit(md.vis, md.x, md.z, md.y));
+                ViewGathNodeList.Clear();
+                foreach (GatheringNode gn in newGathNodeList) {
+                    ViewGathNodeList.Add(new GatheringNode(gn.vis, gn.location));
                 }
             }
         }
         public void setViewPlayer(Player newPlayer) {
             lock (DataLock) {
-                ViewPlayer = new Player(newPlayer.x,
-                    newPlayer.z,
-                    newPlayer.y,
-                    newPlayer.rot);
+                ViewPlayer = new Player(newPlayer.location, newPlayer.rot);
             }
         }
     }
