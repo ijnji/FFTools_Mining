@@ -24,9 +24,6 @@ namespace FFTools {
             List<string> theGenDiagList = theMemory.readGeneralDialogueList();
             // Get a first read of Gather Nodes.
             List<IntPtr> gathNodeAddrList = theMemory.findAddressesOfBytes(gathTypeByteArray);
-            foreach (IntPtr gna in gathNodeAddrList) {
-                System.Console.WriteLine(gna.ToString("X8"));
-            }
             List<GatheringNode> theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
                 // --- Test case Mineral Deposits ---
                 //List<GatheringNode> theGathNodeList = new List<GatheringNode>();
