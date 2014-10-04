@@ -12,15 +12,6 @@ namespace FFTools {
             String gathType= "Mineral Deposit"; //set to desired farming type ex: Mineral Deposit, Mature Tree
             byte[] gathTypeByteArray = Encoding.ASCII.GetBytes(gathType);
 
-
-            //NavigatorGraph test creation
-            //Location one = new Location(1, 2, 3);
-            //Location two = new Location(10, 15, 0);
-            //Location[] array = {one, two};
-            //NavigatorGraph graph = new NavigatorGraph(array);
-            //graph.Print();
-            //Console.ReadLine();
-
             // Ready singleton MemoryManager.
             MemoryManager theMemory = new MemoryManager();
             if (theMemory.initialize() > 0) Environment.Exit(1);
