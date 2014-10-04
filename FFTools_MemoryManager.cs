@@ -287,6 +287,7 @@ namespace FFTools {
             // Search memory.
             int bytesRead = 0;  
             while (addrRelative < GATHNODELIST_LENGTH) {
+                System.Console.WriteLine("addrRelative = " + addrRelative.ToString("X8"));
                 VirtualQueryEx(this.ProcHandle, addrAbsolute, out mem_basic_info, (uint) Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
                 // If this memory chunk is readable.
                 bool readable = (mem_basic_info.Protect == PAGE_READWRITE) ||
@@ -299,21 +300,22 @@ namespace FFTools {
                     // Read memory and dump into buffer to search.
                     ReadProcessMemory(this.ProcHandle, mem_basic_info.BaseAddress, buffer, buffer.Length, ref bytesRead);
                     // Search buffer.
-                        int i = 0;
-                        while (i < (int)mem_basic_info.RegionSize) {
-                            int p = 0;
-                            while (buffer[i] == bytesToFind[p]) {
-                                i++; p++;
-                                if ((p >= bytesToFind.Length) || (i >= (int)mem_basic_info.RegionSize)) break;
-                            }
-                            if (p == bytesToFind.Length) {
-                                addrFoundList.Add(mem_basic_info.BaseAddress + i - bytesToFind.Length);
-                            }
-                            i++;
+                    int i = 0;
+                    while ( (i < (int)mem_basic_info.RegionSize) && (addrRelative < GATHNODELIST_LENGTH) ) {
+                        int p = 0;
+                        while (buffer[i] == bytesToFind[p]) {
+                            i++; p++;
+                            if ((p >= bytesToFind.Length) || (i >= (int)mem_basic_info.RegionSize)) break;
                         }
+                        if (p == bytesToFind.Length) {
+                            addrFoundList.Add(mem_basic_info.BaseAddress + i - bytesToFind.Length);
+                        }
+                        i++; addrRelative++;
+                    }
+                } else {
+                    addrRelative = addrRelative + (long)mem_basic_info.RegionSize;
                 }
                 // Move to the next memory chunk
-                addrRelative = addrRelative + (long)mem_basic_info.RegionSize;
                 addrAbsolute = new IntPtr((long)addrAbsolute + (long)mem_basic_info.RegionSize);
             }
             return addrFoundList;
