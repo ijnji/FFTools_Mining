@@ -15,49 +15,35 @@ namespace FFTools {
             // Ready singleton MemoryManager.
             MemoryManager theMemory = new MemoryManager();
             if (theMemory.initialize() > 0) Environment.Exit(1);
-            // Get a first read of Player.
-            Player thePlayer = theMemory.readPlayer();
-            System.Console.WriteLine(thePlayer);
             // Ready singleton Navigator.
             Navigator theNavigator = new Navigator(theMemory);
-            // Get a first read of Gen Diag.
+
+            // Get a first read of all data.
+            Player thePlayer = theMemory.readPlayer();
             List<string> theGenDiagList = theMemory.readGeneralDialogueList();
-            // Get a first read of Gather Nodes.
             List<IntPtr> gathNodeAddrList = theMemory.findAddressesOfBytes(gathTypeByteArray);
             List<GatheringNode> theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
-                // --- Test case Mineral Deposits ---
-                //List<GatheringNode> theGathNodeList = new List<GatheringNode>();
-                //theGathNodeList.Add(new GatheringNode(false, (float)205.1436, 0, (float)-83.35779));
-                //theGathNodeList.Add(new GatheringNode(false, (float)216.1513, 0, (float)-87.30682));
-                //theGathNodeList.Add(new GatheringNode(false, (float)221.7113, 0, (float)-95.18837));
-                //theGathNodeList.Add(new GatheringNode(false, (float)225.8484, 0, (float)-106.7841));
-                //theGathNodeList.Add(new GatheringNode(false, (float)256.3488, 0, (float)-215.9667));
-                //theGathNodeList.Add(new GatheringNode(false, (float)262.8185, 0, (float)-170.5062));
-                //theGathNodeList.Add(new GatheringNode(false, (float)274.6811, 0, (float)-247.5));
-                //theGathNodeList.Add(new GatheringNode(false, (float)286.9102, 0, (float)-252.5938));
-                //theGathNodeList.Add(new GatheringNode(false, (float)317.0013, 0, (float)-178.881));
-                //theGathNodeList.Add(new GatheringNode(false, (float)323.3648, 0, (float)-182.2007));
-                //theGathNodeList.Add(new GatheringNode(false, (float)325.8448, 0, (float)-265.9896));
-                //theGathNodeList.Add(new GatheringNode(false, (float)333.5263, 0, (float)-214.3547));
-                //theGathNodeList.Add(new GatheringNode(false, (float)334.8407, 0, (float)-242.5161));
-                //theGathNodeList.Add(new GatheringNode(true , (float)332.7316, 0, (float)-256.8401));
-                //theGathNodeList.Add(new GatheringNode(true, (float)261.0139, 0, (float)-202.0589));
-                //theGathNodeList.Add(new GatheringNode(true, (float)291.211, 0, (float)-255.4915));
-                // --- Test case Mineral Deposits ---
             // Start the UI thread.
             MapForm theMapForm = new MapForm();
             Thread formStartThread = new Thread(new ParameterizedThreadStart(formStart));
             formStartThread.Start(theMapForm);
-            // Show working set of Gathering Nodes on MapForm.
             theMapForm.setViewGathNodeList(theGathNodeList);
+
+            // Begin main loop.
+            while (true) {
+                // Read one copy of each data from memory only.
+                thePlayer = theMemory.readPlayer();
+                theGenDiagList = theMemory.readGeneralDialogueList();
+                theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
+
+                theMapForm.setViewPlayer(thePlayer);
+                theMapForm.setViewGathNodeList(theGathNodeList);
+                // Update each 200ms.
+                Thread.Sleep(200);
+            }
 
             //GatheringNode gn = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
             //Queue<GatheringNode> gnHistory = new Queue<GatheringNode>();
-            
-            foreach (GatheringNode gn in theGathNodeList) {
-                System.Console.WriteLine(gn);
-            }
-
             //while (true) {
             //    thePlayer = theMemory.readPlayer();
             //    GathTypeAddresses = theMemory.findAddressesOfBytes(GathTypeByteArray);
