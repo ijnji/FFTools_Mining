@@ -31,19 +31,16 @@ namespace FFTools {
         [DllImport("user32.dll")]
         private static extern IntPtr PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
 
-        // Pointer walk offsets for address bases - v2014.09.11
-        private int[] ADDR_PWALK_PLAYX = {0xEE79B0, 0xC, 0x90, 0x454, 0x4, 0x30};
+        // Pointer walk offsets for address bases
+        private int[] ADDR_PWALK_PLAYX = {0x10371E0, 0x31C, 0x504, 0xA0};
         private int[] ADDR_PWALK_FISHBITE = {0xFF7BDC, 0x0, 0x3C, 0x2C};
         private int[] ADDR_PWALK_GATHNODELIST = {0x1033E08, 0x30};
-        // Pointer walk offsets for address bases - earlier.
-        // private const int[] ADDR_PWALK_FISHBITE = {0x1034CD8, 0x14, 0x118};
-        // private const int[] ADDR_PWALK_GENDIAG = {0xF20F70, 0x18, 0x42C, 0x0};
         // Alt - private const int[] ADDR_PWALK_GENDIAG = {0xF20F70, 0x1C, 0x18, 0x42C, 0x0};
 
         // Address offsets from address bases.
         private const int ADDR_OFF_PLAYERZ = 0x4;
         private const int ADDR_OFF_PLAYERY = 0x8;
-        private const int ADDR_OFF_PLAYERROT = 0x14;
+        private const int ADDR_OFF_PLAYERROT = 0x10;
         private const int ADDR_OFF_GATHNODEVIS = 0xC8;
         private const int ADDR_OFF_GATHNODEX = 0x70;
         private const int ADDR_OFF_GATHNODEZ = 0x74;
@@ -287,7 +284,6 @@ namespace FFTools {
             // Search memory.
             int bytesRead = 0;  
             while (addrRelative < GATHNODELIST_LENGTH) {
-                System.Console.WriteLine("addrRelative = " + addrRelative.ToString("X8"));
                 VirtualQueryEx(this.ProcHandle, addrAbsolute, out mem_basic_info, (uint) Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
                 // If this memory chunk is readable.
                 bool readable = (mem_basic_info.Protect == PAGE_READWRITE) ||
