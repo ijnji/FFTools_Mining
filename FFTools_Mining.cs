@@ -20,7 +20,7 @@ namespace FFTools {
 
             // Get a first read of all data.
             Player thePlayer = theMemory.readPlayer();
-            List<string> theGenDiagList = theMemory.readGeneralDialogueList();
+            //List<string> theGenDiagList = theMemory.readGeneralDialogueList();
             List<IntPtr> gathNodeAddrList = theMemory.findAddressesOfBytes(gathTypeByteArray);
             List<GatheringNode> theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
             // Start the UI thread.
@@ -33,7 +33,6 @@ namespace FFTools {
             while (true) {
                 // Read one copy of each data from memory only.
                 thePlayer = theMemory.readPlayer();
-                theGenDiagList = theMemory.readGeneralDialogueList();
                 theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
 
                 theMapForm.setViewPlayer(thePlayer);

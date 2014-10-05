@@ -98,14 +98,14 @@ namespace FFTools {
             System.Console.WriteLine("---");
             //System.Console.WriteLine("Pointer walking for the general dialog box address...");
             //AddrGenDiag = pointerWalk(ProcAddrBase, ADDROFFS_GENDIAG);
-            System.Console.WriteLine("Manually setting the general dialog box address...");
-            AddrGenDiag = (IntPtr)0x05AF3680;
-            System.Console.WriteLine("Setting general dialog box address as 0x" + AddrGenDiag.ToString("X8"));     
+            //System.Console.WriteLine("Setting general dialog box address as 0x" + AddrGenDiag.ToString("X8"));
+            System.Console.WriteLine("Skipping the general dialog box address for now..."); 
 
             System.Console.WriteLine("---");
-            System.Console.WriteLine("Pointer walking for the fish bite status address...");
-            AddrFishBite = pointerWalk(ProcAddrBase, ADDR_PWALK_FISHBITE);
-            System.Console.WriteLine("Setting fish bite status address as 0x" + AddrFishBite.ToString("X8"));
+            //System.Console.WriteLine("Pointer walking for the fish bite status address...");
+            //AddrFishBite = pointerWalk(ProcAddrBase, ADDR_PWALK_FISHBITE);
+            //System.Console.WriteLine("Setting fish bite status address as 0x" + AddrFishBite.ToString("X8"));
+            System.Console.WriteLine("Skipping the fish bite status address for now...");
 
             System.Console.WriteLine("---");
             System.Console.WriteLine("Pointer walking for the gathering node list address...");
