@@ -21,9 +21,12 @@ namespace FFTools {
         private const int GRID_COLOR_LINES_R = 0x30;
         private const int GRID_COLOR_LINES_G = 0x30;
         private const int GRID_COLOR_LINES_B = 0x30;
-        private const int GRID_COLOR_GATHNODE_R = 0xF0;
-        private const int GRID_COLOR_GATHNODE_G = 0xF0;
-        private const int GRID_COLOR_GATHNODE_B = 0xFF;
+        private const int GRID_COLOR_GATHNODE_VIS_R = 0xFF;
+        private const int GRID_COLOR_GATHNODE_VIS_G = 0xFF;
+        private const int GRID_COLOR_GATHNODE_VIS_B = 0x40;
+        private const int GRID_COLOR_GATHNODE_INV_R = 0x00;
+        private const int GRID_COLOR_GATHNODE_INV_G = 0x80;
+        private const int GRID_COLOR_GATHNODE_INV_B = 0x80;
 
         private System.Windows.Forms.Timer RefreshTimer;
         private IContainer Components;
@@ -141,14 +144,26 @@ namespace FFTools {
             gridPen.Dispose();
         }
         private void paintGatheringNodes(Graphics gBmp, List<GatheringNode> tmpViewGathNodeList) {
-            SolidBrush gnBrush = new SolidBrush(Color.FromArgb(GRID_COLOR_GATHNODE_R,
-                                                               GRID_COLOR_GATHNODE_G,
-                                                               GRID_COLOR_GATHNODE_B));
+            SolidBrush gnvisBrush = new SolidBrush(Color.FromArgb(0xFF,
+                                                                            GRID_COLOR_GATHNODE_VIS_R,
+                                                                            GRID_COLOR_GATHNODE_VIS_G,
+                                                                            GRID_COLOR_GATHNODE_VIS_B));
+            SolidBrush gninvBrush = new SolidBrush(Color.FromArgb(0xFF,
+                                                                            GRID_COLOR_GATHNODE_INV_R,
+                                                                            GRID_COLOR_GATHNODE_INV_G,
+                                                                            GRID_COLOR_GATHNODE_INV_B));
             foreach (GatheringNode tvgn in tmpViewGathNodeList) {
-                gBmp.FillEllipse(gnBrush, 
-                    (int)Math.Round(tvgn.location.x * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN, 
-                     BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(tvgn.location.y * GRID_PIXELS_PER_ILMS),
-                    4, 4);
+                if (tvgn.vis) {
+                    gBmp.FillEllipse(gnvisBrush, 
+                        (int)Math.Round(tvgn.location.x * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN, 
+                         BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(tvgn.location.y * GRID_PIXELS_PER_ILMS),
+                        4, 4);
+                } else {
+                    gBmp.FillEllipse(gninvBrush, 
+                        (int)Math.Round(tvgn.location.x * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN, 
+                         BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(tvgn.location.y * GRID_PIXELS_PER_ILMS),
+                        4, 4);
+                }
             }
         }
         private void paintPlayer(Graphics gBmp, Player tmpViewPlayer) {
