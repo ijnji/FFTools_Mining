@@ -9,8 +9,8 @@ using System.Windows.Forms;
 namespace FFTools {
     public class Mining {
         public static void Main() {
-            String GathType= "Mature Tree"; //set to desired farming type ex: Mineral Deposit, Mature Tree
-            byte[] GathTypeByteArray = Encoding.ASCII.GetBytes(GathType);
+            String gathType= "Mineral Deposit"; //set to desired farming type ex: Mineral Deposit, Mature Tree
+            byte[] gathTypeByteArray = Encoding.ASCII.GetBytes(gathType);
 
             // Ready singleton MemoryManager.
             MemoryManager theMemory = new MemoryManager();
@@ -23,8 +23,8 @@ namespace FFTools {
             // Get a first read of Gen Diag.
             List<string> theGenDiagList = theMemory.readGeneralDialogueList();
             // Get a first read of Gather Nodes.
-            List<IntPtr> GathTypeAddresses = theMemory.findAddressesOfBytes(GathTypeByteArray);
-            List<GatheringNode> theGathNodeList = theMemory.readGatheringNodeList(GathTypeAddresses);
+            List<IntPtr> gathNodeAddrList = theMemory.findAddressesOfBytes(gathTypeByteArray);
+            List<GatheringNode> theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
                 // --- Test case Mineral Deposits ---
                 //List<GatheringNode> theGathNodeList = new List<GatheringNode>();
                 //theGathNodeList.Add(new GatheringNode(false, (float)205.1436, 0, (float)-83.35779));
@@ -51,36 +51,40 @@ namespace FFTools {
             // Show working set of Gathering Nodes on MapForm.
             theMapForm.setViewGathNodeList(theGathNodeList);
 
-            GatheringNode gn = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
-            Queue<GatheringNode> gnHistory = new Queue<GatheringNode>();
+            //GatheringNode gn = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
+            //Queue<GatheringNode> gnHistory = new Queue<GatheringNode>();
             
-            while (true) {
-                thePlayer = theMemory.readPlayer();
-                GathTypeAddresses = theMemory.findAddressesOfBytes(GathTypeByteArray);
-                theGathNodeList = theMemory.readGatheringNodeList(GathTypeAddresses);
-                System.Console.WriteLine("-------");
-                System.Console.WriteLine("Nearest mineral deposit is at...");
-                gn = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
+            foreach (GatheringNode gn in theGathNodeList) {
                 System.Console.WriteLine(gn);
-                if( Location.findDistanceBetween(thePlayer.location, gn.location) < 250) { //TODO: fix 250 hack
-                    System.Console.WriteLine("With a distance of " + Location.findDistanceBetween(thePlayer.location, gn.location));
-                    System.Console.WriteLine("Need to face " + thePlayer.findOrientationRelativeTo(gn.location));
-                    System.Console.WriteLine("Traveling to the node...");
-                    travelTo(theMemory, gn.location);
-                    gatherFrom(theMemory);
-                    System.Console.WriteLine("Done with this node!");
-                    if (gnHistory.Count > 10) gnHistory.Dequeue();
-                    gnHistory.Enqueue(gn);
-                }
-                else {
-                    System.Console.WriteLine("No nearby node, moving to previous good node and searching again");
-                    gn = gnHistory.Dequeue();
-                    System.Console.WriteLine("With a distance of " + Location.findDistanceBetween(thePlayer.location, gn.location));
-                    System.Console.WriteLine("Need to face " + thePlayer.findOrientationRelativeTo(gn.location));
-                    System.Console.WriteLine("Traveling to the node...");
-                    travelTo(theMemory, gn.location);
-                }
             }
+
+            //while (true) {
+            //    thePlayer = theMemory.readPlayer();
+            //    GathTypeAddresses = theMemory.findAddressesOfBytes(GathTypeByteArray);
+            //    theGathNodeList = theMemory.readGatheringNodeList(GathTypeAddresses);
+            //    System.Console.WriteLine("-------");
+            //    System.Console.WriteLine("Nearest mineral deposit is at...");
+            //    gn = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
+            //    System.Console.WriteLine(gn);
+            //    if( Location.findDistanceBetween(thePlayer.location, gn.location) < 250) { //TODO: fix 250 hack
+            //        System.Console.WriteLine("With a distance of " + Location.findDistanceBetween(thePlayer.location, gn.location));
+            //        System.Console.WriteLine("Need to face " + thePlayer.findOrientationRelativeTo(gn.location));
+            //        System.Console.WriteLine("Traveling to the node...");
+            //        travelTo(theMemory, gn.location);
+            //        gatherFrom(theMemory);
+            //        System.Console.WriteLine("Done with this node!");
+            //        if (gnHistory.Count > 10) gnHistory.Dequeue();
+            //        gnHistory.Enqueue(gn);
+            //    }
+            //    else {
+            //        System.Console.WriteLine("No nearby node, moving to previous good node and searching again");
+            //        gn = gnHistory.Dequeue();
+            //        System.Console.WriteLine("With a distance of " + Location.findDistanceBetween(thePlayer.location, gn.location));
+            //        System.Console.WriteLine("Need to face " + thePlayer.findOrientationRelativeTo(gn.location));
+            //        System.Console.WriteLine("Traveling to the node...");
+            //        travelTo(theMemory, gn.location);
+            //    }
+            //}
         }
 
         private static void formStart(Object theMapForm) {

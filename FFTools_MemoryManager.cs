@@ -34,6 +34,7 @@ namespace FFTools {
         // Pointer walk offsets for address bases - v2014.09.11
         private int[] ADDR_PWALK_PLAYX = {0xEE79B0, 0xC, 0x90, 0x454, 0x4, 0x30};
         private int[] ADDR_PWALK_FISHBITE = {0xFF7BDC, 0x0, 0x3C, 0x2C};
+        private int[] ADDR_PWALK_GATHNODELIST = {0x1009EF0, 0x30};
         // Pointer walk offsets for address bases - earlier.
         // private const int[] ADDR_PWALK_FISHBITE = {0x1034CD8, 0x14, 0x118};
         // private const int[] ADDR_PWALK_GENDIAG = {0xF20F70, 0x18, 0x42C, 0x0};
@@ -53,7 +54,8 @@ namespace FFTools {
         private int[] GENDIAG_ENDPATTERN = {0x02, 0x13, 0x02, 0xEC, 0x03, 0x0D};
         private int FISHBITE_BITE = 0x1;
         private const int GATHNODE_VIS = 0x0;
-        private const int GATHNODE_INVIS = 0x80;        
+        private const int GATHNODE_INVIS = 0x80;
+        private const int GATHNODELIST_LENGTH = 0x3000;
 
         // Address bases.
         private Process Proc = null;
@@ -62,6 +64,7 @@ namespace FFTools {
         private IntPtr AddrPlayerX = IntPtr.Zero;
         private IntPtr AddrGenDiag = IntPtr.Zero;
         private IntPtr AddrFishBite = IntPtr.Zero;
+        private IntPtr AddrGathNodeList = IntPtr.Zero;
 
         // Other fields. 
         public struct MEMORY_BASIC_INFORMATION
@@ -106,6 +109,11 @@ namespace FFTools {
             System.Console.WriteLine("Pointer walking for the fish bite status address...");
             AddrFishBite = pointerWalk(ProcAddrBase, ADDR_PWALK_FISHBITE);
             System.Console.WriteLine("Setting fish bite status address as 0x" + AddrFishBite.ToString("X8"));
+
+            System.Console.WriteLine("---");
+            System.Console.WriteLine("Pointer walking for the gathering node list address...");
+            AddrGathNodeList = pointerWalk(ProcAddrBase, ADDR_PWALK_GATHNODELIST);
+            System.Console.WriteLine("Setting gathering node list address as 0x" + AddrGathNodeList.ToString("X8"));
          
             System.Console.WriteLine("---");
 
@@ -162,7 +170,7 @@ namespace FFTools {
         private byte[] readProcByteBlock(IntPtr addr, int bytesToRead) {
             byte[] buffer = new byte[bytesToRead];
             int bytesRead = 0;
-            ReadProcessMemory(ProcHandle, addr, buffer, buffer.Length, ref bytesRead);
+            ReadProcessMemory(this.ProcHandle, addr, buffer, buffer.Length, ref bytesRead);
             return buffer;
         }
 
@@ -268,56 +276,49 @@ namespace FFTools {
             return mdlist;
         }
 
+        // Returns a List of addresses of gathering nodes for the given gathering node type.
         public List <IntPtr> findAddressesOfBytes (byte[] bytesToFind) {
-        //Find visible nodes
-            //System.Console.WriteLine("finding addresses of stuff");
-            long PROC_VM_SIZE = this.Proc.VirtualMemorySize64;
-            //System.Console.WriteLine("process memory size: "+PROC_VM_SIZE);
-            long mem_count = 0;
-            List <IntPtr> Addresses = new List <IntPtr> ();
-            IntPtr address = this.ProcAddrBase;
-            IntPtr StuffAddress = IntPtr.Zero;
-            
-            // this will store any information we get from VirtualQueryEx()
+            //System.Console.WriteLine("Finding addresses of gathering nodes.");
+            long addrRelative = 0;
+            IntPtr addrAbsolute = AddrGathNodeList;
+            List <IntPtr> addrFoundList = new List<IntPtr>();
+            // This will store any information we get from VirtualQueryEx().
             MEMORY_BASIC_INFORMATION mem_basic_info = new MEMORY_BASIC_INFORMATION();
-            int bytesRead = 0;  // number of bytes read with ReadProcessMemory
-    
-            //search memory
-            while (mem_count < PROC_VM_SIZE)
-            {
-                VirtualQueryEx(this.ProcHandle, address, out mem_basic_info, (uint) Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
-                // if this memory chunk is readable 
-                if ((mem_basic_info.Protect == PAGE_READWRITE
-                     || mem_basic_info.Protect == PAGE_READONLY
-                     || mem_basic_info.Protect == PAGE_EXECUTE_READWRITE
-                     || mem_basic_info.Protect == PAGE_EXECUTE_READ) 
-                        && mem_basic_info.State == MEM_COMMIT)
-                {
+            // Search memory.
+            int bytesRead = 0;  
+            while (addrRelative < GATHNODELIST_LENGTH) {
+                System.Console.WriteLine("addrRelative = " + addrRelative.ToString("X8"));
+                VirtualQueryEx(this.ProcHandle, addrAbsolute, out mem_basic_info, (uint) Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
+                // If this memory chunk is readable.
+                bool readable = (mem_basic_info.Protect == PAGE_READWRITE) ||
+                                (mem_basic_info.Protect == PAGE_READONLY) ||
+                                (mem_basic_info.Protect == PAGE_EXECUTE_READWRITE) ||
+                                (mem_basic_info.Protect == PAGE_EXECUTE_READ);
+                bool commitable = mem_basic_info.State == MEM_COMMIT;
+                if (readable && commitable) {
                     byte[] buffer = new byte[(int)mem_basic_info.RegionSize];
-                    //read memory and dump into buffer to search 
-                    ReadProcessMemory(this.ProcHandle, mem_basic_info.BaseAddress, buffer, (int)mem_basic_info.RegionSize, ref bytesRead);
-                    //search buffer
+                    // Read memory and dump into buffer to search.
+                    ReadProcessMemory(this.ProcHandle, mem_basic_info.BaseAddress, buffer, buffer.Length, ref bytesRead);
+                    // Search buffer.
                     int i = 0;
-                    while (i < (int) mem_basic_info.RegionSize) {
+                    while ( (i < (int)mem_basic_info.RegionSize) && (addrRelative < GATHNODELIST_LENGTH) ) {
                         int p = 0;
                         while (buffer[i] == bytesToFind[p]) {
                             i++; p++;
-                            if ((p >= bytesToFind.Length) || (i >= (int) mem_basic_info.RegionSize)) break;
+                            if ((p >= bytesToFind.Length) || (i >= (int)mem_basic_info.RegionSize)) break;
                         }
                         if (p == bytesToFind.Length) {
-                            StuffAddress = address + i - bytesToFind.Length;
-                            //System.Console.WriteLine("bytesToFind Found! " + StuffAddress.ToString("X8"));
-                            Addresses.Add(StuffAddress);
+                            addrFoundList.Add(mem_basic_info.BaseAddress + i - bytesToFind.Length);
                         }
-                        i++;
+                        i++; addrRelative++;
                     }
+                } else {
+                    addrRelative = addrRelative + (long)mem_basic_info.RegionSize;
                 }
-                // move to the next memory chunk
-                mem_count = mem_count + (long)mem_basic_info.RegionSize;
-                address = new IntPtr((long)address + (long) mem_basic_info.RegionSize);
+                // Move to the next memory chunk
+                addrAbsolute = new IntPtr((long)addrAbsolute + (long)mem_basic_info.RegionSize);
             }
-            //System.Console.WriteLine("memory searched :" + mem_count);
-            return Addresses;
+            return addrFoundList;
         }
     }
 }

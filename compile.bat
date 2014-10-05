@@ -4,6 +4,5 @@ csc.exe FFTools_Location.cs^
         FFTools_MemoryManager.cs^
         FFTools_MapForm.cs^
         FFTools_Waypoint.cs^
-        FFTools_NavigatorGraph.cs^
         FFTools_Navigator.cs^
         FFTools_Mining.cs
