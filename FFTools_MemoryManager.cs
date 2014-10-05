@@ -32,7 +32,7 @@ namespace FFTools {
         private static extern IntPtr PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
 
         // Pointer walk offsets for address bases - v2014.09.11
-        private int[] ADDR_PWALK_PLAYX = {0x1037160, 0x31C, 0x504, 0xA0};
+        private int[] ADDR_PWALK_PLAYX = {0xEE79B0, 0xC, 0x90, 0x454, 0x4, 0x30};
         private int[] ADDR_PWALK_FISHBITE = {0xFF7BDC, 0x0, 0x3C, 0x2C};
         // Pointer walk offsets for address bases - earlier.
         // private const int[] ADDR_PWALK_FISHBITE = {0x1034CD8, 0x14, 0x118};
