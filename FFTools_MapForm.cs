@@ -133,13 +133,13 @@ namespace FFTools {
         }
         private void paintGatheringNodes(Graphics gBmp, List<GatheringNode> tmpViewGathNodeList) {
             SolidBrush gnvisBrush = new SolidBrush(Color.FromArgb(0xFF,
-                                                                            GRID_COLOR_GATHNODE_VIS_R,
-                                                                            GRID_COLOR_GATHNODE_VIS_G,
-                                                                            GRID_COLOR_GATHNODE_VIS_B));
+                                                                  GRID_COLOR_GATHNODE_VIS_R,
+                                                                  GRID_COLOR_GATHNODE_VIS_G,
+                                                                  GRID_COLOR_GATHNODE_VIS_B));
             SolidBrush gninvBrush = new SolidBrush(Color.FromArgb(0xFF,
-                                                                            GRID_COLOR_GATHNODE_INV_R,
-                                                                            GRID_COLOR_GATHNODE_INV_G,
-                                                                            GRID_COLOR_GATHNODE_INV_B));
+                                                                  GRID_COLOR_GATHNODE_INV_R,
+                                                                  GRID_COLOR_GATHNODE_INV_G,
+                                                                  GRID_COLOR_GATHNODE_INV_B));
             foreach (GatheringNode tvgn in tmpViewGathNodeList) {
                 if (tvgn.vis) {
                     gBmp.FillEllipse(gnvisBrush, 
