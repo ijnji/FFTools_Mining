@@ -43,7 +43,7 @@ namespace FFTools {
         // Address offsets from address bases.
         private const int ADDR_OFF_PLAYERZ = 0x4;
         private const int ADDR_OFF_PLAYERY = 0x8;
-        private const int ADDR_OFF_PLAYERROT = 0x10;
+        private const int ADDR_OFF_PLAYERROT = 0x14;
         private const int ADDR_OFF_GATHNODEVIS = 0xC8;
         private const int ADDR_OFF_GATHNODEX = 0x70;
         private const int ADDR_OFF_GATHNODEZ = 0x74;
