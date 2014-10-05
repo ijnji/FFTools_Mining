@@ -89,43 +89,31 @@ namespace FFTools {
             // Convert to absolute pixels for bitmap.
             // Resize form accoridingly and draw.
             float topleftx = BITMAP_OFFSET_TO_ORIGIN / GRID_PIXELS_PER_ILMS;
-            float toplefty = -BITMAP_OFFSET_TO_ORIGIN / GRID_PIXELS_PER_ILMS;
+            float toplefty = BITMAP_OFFSET_TO_ORIGIN / GRID_PIXELS_PER_ILMS;
             float botrighx = -BITMAP_OFFSET_TO_ORIGIN / GRID_PIXELS_PER_ILMS;
-            float botrighy = BITMAP_OFFSET_TO_ORIGIN / GRID_PIXELS_PER_ILMS;
+            float botrighy = -BITMAP_OFFSET_TO_ORIGIN / GRID_PIXELS_PER_ILMS;
 
             foreach (GatheringNode tvgn in tmpViewGathNodeList) {
                 if (tvgn.location.x < topleftx) topleftx = tvgn.location.x;
-                if (tvgn.location.y > toplefty) toplefty = tvgn.location.y;
+                if (tvgn.location.y < toplefty) toplefty = tvgn.location.y;
                 if (tvgn.location.x > botrighx) botrighx = tvgn.location.x;
-                if (tvgn.location.y < botrighy) botrighy = tvgn.location.y;
+                if (tvgn.location.y > botrighy) botrighy = tvgn.location.y;
             }
 
             int bitmaptopleftx = (int)Math.Round(topleftx * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN;
-            int bitmaptoplefty = BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(toplefty * GRID_PIXELS_PER_ILMS);
+            int bitmaptoplefty = (int)Math.Round(toplefty * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN;
             int bitmapbotrighx = (int)Math.Round(botrighx * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN;
-            int bitmapbotrighy = BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(botrighy * GRID_PIXELS_PER_ILMS);
+            int bitmapbotrighy = (int)Math.Round(botrighy * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN;
+            int bitmapwidth = bitmapbotrighx - bitmaptopleftx + GRID_LEFT_PADDING_IN_PIXELS + GRID_RIGHT_PADDING_IN_PIXELS;
+            int bitmapheigh = bitmapbotrighy - bitmaptoplefty + GRID_TOP_PADDING_IN_PIXELS + GRID_BOTTOM_PADDING_IN_PIXELS;
 
-            this.Size = new Size(bitmapbotrighx - bitmaptopleftx + 
-                                 GRID_LEFT_PADDING_IN_PIXELS + GRID_RIGHT_PADDING_IN_PIXELS,
-                                 bitmapbotrighy - bitmaptoplefty +
-                                 GRID_TOP_PADDING_IN_PIXELS + GRID_BOTTOM_PADDING_IN_PIXELS);
+            this.Size = new Size(bitmapwidth, bitmapheigh);
             Graphics gForm = e.Graphics;
-            gForm.FillRectangle(Brushes.Black, 0, 0, 
-                                bitmapbotrighx - bitmaptopleftx +
-                                GRID_LEFT_PADDING_IN_PIXELS + GRID_RIGHT_PADDING_IN_PIXELS,
-                                bitmapbotrighy - bitmaptoplefty +
-                                GRID_TOP_PADDING_IN_PIXELS + GRID_BOTTOM_PADDING_IN_PIXELS);
-            RectangleF desRect = new RectangleF(0, 0,
-                                                bitmapbotrighx - bitmaptopleftx +
-                                                GRID_LEFT_PADDING_IN_PIXELS + GRID_RIGHT_PADDING_IN_PIXELS,
-                                                bitmapbotrighy - bitmaptoplefty +
-                                                GRID_TOP_PADDING_IN_PIXELS + GRID_BOTTOM_PADDING_IN_PIXELS);
+            gForm.FillRectangle(Brushes.Black, 0, 0, bitmapwidth, bitmapheigh);
+            RectangleF desRect = new RectangleF(0, 0, bitmapwidth, bitmapheigh);
             RectangleF srcRect = new RectangleF(bitmaptopleftx - GRID_LEFT_PADDING_IN_PIXELS,
                                                 bitmaptoplefty - GRID_TOP_PADDING_IN_PIXELS,
-                                                bitmapbotrighx - bitmaptopleftx +
-                                                GRID_LEFT_PADDING_IN_PIXELS + GRID_RIGHT_PADDING_IN_PIXELS,
-                                                bitmapbotrighy - bitmaptoplefty +
-                                                GRID_TOP_PADDING_IN_PIXELS + GRID_BOTTOM_PADDING_IN_PIXELS);
+                                                bitmapwidth, bitmapheigh);
             gForm.DrawImage(bmp, desRect, srcRect, GraphicsUnit.Pixel);
         }
         private void paintGrid(Graphics gBmp) {
@@ -156,12 +144,12 @@ namespace FFTools {
                 if (tvgn.vis) {
                     gBmp.FillEllipse(gnvisBrush, 
                         (int)Math.Round(tvgn.location.x * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN, 
-                         BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(tvgn.location.y * GRID_PIXELS_PER_ILMS),
+                        (int)Math.Round(tvgn.location.y * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN,
                         4, 4);
                 } else {
                     gBmp.FillEllipse(gninvBrush, 
                         (int)Math.Round(tvgn.location.x * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN, 
-                         BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(tvgn.location.y * GRID_PIXELS_PER_ILMS),
+                        (int)Math.Round(tvgn.location.y * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN,
                         4, 4);
                 }
             }
@@ -169,7 +157,7 @@ namespace FFTools {
         private void paintPlayer(Graphics gBmp, Player tmpViewPlayer) {
             gBmp.FillEllipse(Brushes.Crimson,
                 (int)Math.Round(tmpViewPlayer.location.x * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN,
-                BITMAP_OFFSET_TO_ORIGIN - (int)Math.Round(tmpViewPlayer.location.y * GRID_PIXELS_PER_ILMS),
+                (int)Math.Round(tmpViewPlayer.location.y * GRID_PIXELS_PER_ILMS) + BITMAP_OFFSET_TO_ORIGIN,
                 6, 6);
         }
         private void paintText(Graphics gBmp) {
