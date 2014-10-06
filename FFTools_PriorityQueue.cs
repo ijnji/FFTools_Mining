@@ -10,9 +10,9 @@ namespace FFTools {
         //right child at 2i+1
 		protected List <T> list;
 		
-		public PriorityQueue()
-		{
+		public PriorityQueue() {
 			list = new List <T> ();
+            list.Add(default (T)); //dummy at index 0
 		}
 
 		public int Count {
@@ -42,10 +42,10 @@ namespace FFTools {
         private void bubbleUp() {
             //start at bottom
             int index = list.Count - 1; 
-            if (index == 0) return;
+            if (index <= 1) return;
 
             bool swap = list[index/2].CompareTo(list[index]) > 0;       //negative: instance precedes obj; zero: same; positive: instance follows obj
-            while(swap) {
+            while(swap && !(index <= 1)) {
                 T temp = list[index];
                 list[index] = list[index/2];
                 list[index/2] = temp;
@@ -55,12 +55,20 @@ namespace FFTools {
 
         private void percolateDown() {
             int index = 1; //start at top
-            if (list.Count == 1) return;
+            if (this.Count <= 1) return;
 
             int checkLeft, checkRight;
             bool swapLeft, swapRight;
-            checkLeft = list[index].CompareTo(list[2*index]);           //negative: instance precedes obj; zero: same; positive: instance follows obj
-            checkRight = ((2*index + 1) >= list.Count) ? -1 : index.CompareTo(list[2*index + 1]);
+            if ((2*index) > this.Count) {
+               checkLeft = -1; 
+            } else {
+                checkLeft = list[index].CompareTo(list[2*index]);           //negative: instance precedes obj; zero: same; positive: instance follows obj
+            }
+            if ((2*index + 1) > this.Count) {
+                checkRight = -1;
+            } else {
+                checkRight = list[index].CompareTo(list[2*index + 1]);
+            }
             swapLeft = checkLeft > 0;
             swapRight = checkRight > 0;
 
@@ -71,12 +79,24 @@ namespace FFTools {
                     list[2*index + 1] = temp;
                     index = 2*index + 1;
                 }
-                if (swapLeft) {
+                else if (swapLeft) {
                     T temp = list[index];
                     list[index] = list[2*index];
                     list[2*index] = temp;
                     index = 2*index;
                 }
+                if ((2*index) > this.Count) {
+                   checkLeft = -1; 
+                } else {
+                    checkLeft = list[index].CompareTo(list[2*index]);           //negative: instance precedes obj; zero: same; positive: instance follows obj
+                }
+                if ((2*index + 1) > this.Count) {
+                    checkRight = -1;
+                } else {
+                    checkRight = list[index].CompareTo(list[2*index + 1]);
+                }
+                swapLeft = checkLeft > 0;
+                swapRight = checkRight > 0;
             }
         }
 	}
