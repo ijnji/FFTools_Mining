@@ -44,7 +44,8 @@ namespace FFTools {
             int index = list.Count - 1; 
             if (index <= 1) return;
 
-            bool swap = list[index/2].CompareTo(list[index]) > 0;       //negative: instance precedes obj; zero: same; positive: instance follows obj
+            bool swap = list[index/2].CompareTo(list[index]) >= 0;       //negative: instance precedes obj; zero: same; positive: instance follows obj
+                                                                         //using >= so that latest addition takes priority
             while(swap && !(index <= 1)) {
                 T temp = list[index];
                 list[index] = list[index/2];

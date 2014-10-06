@@ -29,7 +29,7 @@ namespace FFTools {
            
             public int Score {
                 get {
-                    return costToNode + costToTarget;
+                    return (costToNode == int.MaxValue) || (costToTarget == int.MaxValue) ? int.MaxValue :  costToNode + costToTarget;
                 }
             } 
             public GraphNode(Location location, bool ns, bool sn, bool ew, bool we) {
@@ -189,10 +189,13 @@ namespace FFTools {
                 //                      " y: " + location.y +
                 //                      " minX: " + minX + 
                 //                      " maxY: " + maxY);
+
+                //min X,Y is at [NavGraph.Length][0]
+                //max X,Y is at [0][NavGraph[0].Length]
                 float tmp = location.x - this.minX;
                 outX = (int) Math.Floor((tmp/DIST_PER_GRID));
-                tmp = this.maxY - location.y;
-                outY = (int) Math.Floor((tmp/DIST_PER_GRID));
+                tmp = this.maxY - 1 - location.y;  //-1 because max is not inclusive
+                outY = (int) Math.Ceiling((tmp/DIST_PER_GRID));
                 return true;
             }
             outX = -1;
@@ -212,9 +215,9 @@ namespace FFTools {
             List <int[]> adjacent = new List <int[]> ();
             //4 possibilities
             //North
-            if( (y+1) < NavGraph.Length) { //check within graph bounds
-                if (NavGraph[y+1][x].canTravelFrom[(int)Move.StoN]) { //check if we can reach node going in this direction
-                    adjacent.Add(new int[] {x,y+1});
+            if( (y-1) >= 0) { //check within graph bounds
+                if (NavGraph[y-1][x].canTravelFrom[(int)Move.StoN]) { //check if we can reach node going in this direction
+                    adjacent.Add(new int[] {x,y-1});
                 }
             }
             //East
@@ -224,9 +227,9 @@ namespace FFTools {
                 }
             }
             //South
-            if( (y-1) >= 0) { //check within graph bounds
-                if (NavGraph[y-1][x].canTravelFrom[(int)Move.NtoS]) { //check if we can reach node going in this direction
-                    adjacent.Add(new int[] {x,y-1});
+            if( (y+1) < NavGraph.Length) { //check within graph bounds
+                if (NavGraph[y+1][x].canTravelFrom[(int)Move.NtoS]) { //check if we can reach node going in this direction
+                    adjacent.Add(new int[] {x,y+1});
                 }
             }
             //West
@@ -256,22 +259,22 @@ namespace FFTools {
                     NavGraph[y][x].fromY = -1;
                 }
             }
-            System.Console.WriteLine("done clearing cost and from values");
+            System.Console.WriteLine("done clearing cost and fromX/Y values");
 
             int startX, startY;
             int endX, endY;
             findLocation(start, out startX, out startY);
-            System.Console.WriteLine("startX/y: " + startX + "," + startY);
+            System.Console.WriteLine("startX/Y: " + startX + "," + startY);
             findLocation(end, out endX, out endY);
-            System.Console.WriteLine("endX/y: " + endX + "," + endY);
+            System.Console.WriteLine("endX/Y: " + endX + "," + endY);
             System.Console.WriteLine("done finding start/end entries in NavGraph");
             NavGraph[startY][startX].costToNode = 0;
             int currentX = startX;
             int currentY = startY;
             openNodes.addNew(NavGraph[startY][startX]);
-            System.Console.WriteLine("initial openNodes size: " + openNodes.Count);
             while (openNodes.Count > 0) {
                 GraphNode currentNode = openNodes.removeTop();
+                System.Console.WriteLine("Finding currentNode");
                 findLocation(currentNode.location, out currentX, out currentY);
                 if((currentX == endX) && (currentY == endY)) break;
                 List <int[]> adjacentList = this.findAdjacent(currentNode);
@@ -280,7 +283,6 @@ namespace FFTools {
                 foreach (int[] adjacent in adjacentList) {
                 //Calculate score for adjacent node
                     int costToNode = currentNode.costToNode + 1;
-                    System.Console.WriteLine("Node " + adjacent[0] + "," + adjacent[1] + " : " + costToNode);
                     //Heuristic is just direct distance as if nothing in the way
                     int adjacentX = adjacent[0];
                     int adjacentY = adjacent[1];
@@ -288,6 +290,7 @@ namespace FFTools {
                     int dy = adjacentY - endY;
                     int costToTarget = (int)Math.Ceiling(Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2)));
                     int score = costToNode + costToTarget;
+                    System.Console.WriteLine("Node " + adjacent[0] + "," + adjacent[1] + " | Calculated Score: " + score + " | Current Score: " + NavGraph[adjacentY][adjacentX].Score);
                     if (score < NavGraph[adjacentY][adjacentX].Score) {
                         NavGraph[adjacentY][adjacentX].costToTarget = costToTarget;
                         NavGraph[adjacentY][adjacentX].costToNode = costToNode;
@@ -331,7 +334,7 @@ namespace FFTools {
             }
 
             //traceback to build path
-            while ((currentX != startX) && (currentY != startY)) {
+            while ((currentX != startX) || (currentY != startY)) {
                 path.Add(NavGraph[currentY][currentX].location);
                 currentX = NavGraph[currentY][currentX].fromX;
                 currentY = NavGraph[currentY][currentX].fromY;
@@ -391,6 +394,7 @@ namespace FFTools {
             Location[] array2 = {three};
             Location[] array3 = {four, five};
             NavigatorGraph graph = new NavigatorGraph();
+            List <Location> path = new List <Location> (); 
             graph.addLocations(array);
             //graph.Print();
             Console.ReadLine();
@@ -405,9 +409,12 @@ namespace FFTools {
             System.Console.WriteLine("Finding path");
             Location start = new Location((float)3.999,(float)3.999,0);
             Location end = new Location(1,1,0);
-            graph.findPath(start,end);
+            path = graph.findPath(start,end);
             System.Console.WriteLine("path find done");
             graph.Print();
+            foreach (Location waypoint in path) {
+                System.Console.WriteLine(waypoint.ToString());
+            }
             Console.ReadLine();
         }
     }
