@@ -45,12 +45,14 @@ namespace FFTools {
             if (index <= 1) return;
 
             bool swap = list[index/2].CompareTo(list[index]) >= 0;       //negative: instance precedes obj; zero: same; positive: instance follows obj
-                                                                         //using >= so that latest addition takes priority
+                                                                         //using >= so that latest addition takes priority (greedy)
             while(swap && !(index <= 1)) {
                 T temp = list[index];
                 list[index] = list[index/2];
                 list[index/2] = temp;
                 index = index / 2;
+                swap = list[index/2].CompareTo(list[index]) >= 0;       //negative: instance precedes obj; zero: same; positive: instance follows obj
+                                                                         //using >= so that latest addition takes priority (greedy)
             }
         }
 

@@ -311,6 +311,7 @@ namespace FFTools {
                     int score = costToNode + costToTarget;
                     System.Console.WriteLine("Node " + adjacent[0] + "," + adjacent[1] + " | Calculated Score: " + score + " | Current Score: " + NavGraph[adjacentY][adjacentX].Score);
                     if (score < NavGraph[adjacentY][adjacentX].Score) {
+                        System.Console.WriteLine("\tAdding " + adjacentX + "," + adjacentY);
                         NavGraph[adjacentY][adjacentX].costToTarget = costToTarget;
                         NavGraph[adjacentY][adjacentX].costToNode = costToNode;
                         NavGraph[adjacentY][adjacentX].fromX = currentX;
@@ -318,37 +319,7 @@ namespace FFTools {
                         openNodes.addNew(NavGraph[adjacentY][adjacentX]);
                     }
                 }
-                String line1 = "";
-                String line2 = "";
-                String line3 = "";
-                String line4 = "";
-                String line5 = "";
-                for (int y = this.NavGraph.Length-1; y >= 0; y--) {
-                    for (int x = 0; x < this.NavGraph[y].Length; x++) {
-                        line1 = line1 + "\t" + this.NavGraph[y][x].location.x.ToString("n1");
-                        line2 = line2 + "\t" + this.NavGraph[y][x].location.y.ToString("n1");
-                        if(this.NavGraph[y][x].costToNode != int.MaxValue)
-                            line3 = line3 + "\t" + this.NavGraph[y][x].costToNode;
-                        else
-                            line3 = line3 + "\t" + "Max";
-                        if(this.NavGraph[y][x].costToTarget != int.MaxValue)
-                            line4 = line4 + "\t" + this.NavGraph[y][x].costToTarget;
-                        else
-                            line4 = line4 + "\t" + "Max";
-                        line5 = line5 + "\t" + this.NavGraph[y][x].fromX+","+this.NavGraph[y][x].fromY;
-                    }
-                    System.Console.WriteLine(line1);
-                    System.Console.WriteLine(line2);
-                    System.Console.WriteLine(line3);
-                    System.Console.WriteLine(line4);
-                    System.Console.WriteLine(line5);
-                    System.Console.WriteLine();
-                    line1 = "";
-                    line2 = "";
-                    line3 = "";
-                    line4 = "";
-                    line5 = "";
-                }
+                this.Print();
                 Console.ReadLine();
             }
 
@@ -374,37 +345,82 @@ namespace FFTools {
                                      " | maxY: " + this.maxY + 
                                      " | minX: " + this.minX + 
                                      " | maxX: " + this.maxX);
-
+            String line0 = "";
             String line1 = "";
             String line2 = "";
             String line3 = "";
             String line4 = "";
             String line5 = "";
+            String line6 = "";
             for (int y = this.NavGraph.Length-1; y >= 0; y--) {
                 for (int x = 0; x < this.NavGraph[y].Length; x++) {
-                    line1 = line1 + "\t" + this.NavGraph[y][x].location.x.ToString("n1");
-                    line2 = line2 + "\t" + this.NavGraph[y][x].location.y.ToString("n1");
+                    line0 = line0 + "\t";
+                    line1 = line1 + "\t";
+                    line2 = line2 + "\t";
+                    line3 = line3 + "\t";
+                    line4 = line4 + "\t";
+                    line5 = line5 + "\t";
+                    line6 = line6 + "\t";
+                    if (!NavGraph[y][x].canTravelFrom[(int)Move.NtoS]) {
+                        line0 = line0 + "-------";
+                    }
+                    if (!NavGraph[y][x].canTravelFrom[(int)Move.WtoE]) {
+                        line1 = line1 + "|";
+                        line2 = line2 + "|";
+                        line3 = line3 + "|";
+                        line4 = line4 + "|";
+                        line5 = line5 + "|";
+                    } else {
+                        line1 = line1 + " ";
+                        line2 = line2 + " ";
+                        line3 = line3 + " ";
+                        line4 = line4 + " ";
+                        line5 = line5 + " ";
+                    }
+                    if (!NavGraph[y][x].canTravelFrom[(int)Move.StoN]) {
+                        line6 = line6 + "-------";
+                    }
+                    line1 = line1 + this.NavGraph[y][x].location.x.ToString("n1");
+                    line2 = line2 + this.NavGraph[y][x].location.y.ToString("n1");
                     if(this.NavGraph[y][x].costToNode != int.MaxValue)
-                        line3 = line3 + "\t" + this.NavGraph[y][x].costToNode;
+                        line3 = line3 + this.NavGraph[y][x].costToNode;
                     else
-                        line3 = line3 + "\t" + "Max";
+                        line3 = line3 + "Max";
                     if(this.NavGraph[y][x].costToTarget != int.MaxValue)
-                        line4 = line4 + "\t" + this.NavGraph[y][x].costToTarget;
+                        line4 = line4 + this.NavGraph[y][x].costToTarget;
                     else
-                        line4 = line4 + "\t" + "Max";
-                    line5 = line5 + "\t" + this.NavGraph[y][x].fromX+","+this.NavGraph[y][x].fromY;
+                        line4 = line4 + "Max";
+                    line5 = line5 + this.NavGraph[y][x].fromX+","+this.NavGraph[y][x].fromY;
+                    if (!NavGraph[y][x].canTravelFrom[(int)Move.EtoW])
+                    {
+                        line1 = line1 + "|";
+                        line2 = line2 + "|";
+                        line3 = line3 + "|";
+                        line4 = line4 + "|";
+                        line5 = line5 + "|";
+                    } else {
+                        line1 = line1 + " ";
+                        line2 = line2 + " ";
+                        line3 = line3 + " ";
+                        line4 = line4 + " ";
+                        line5 = line5 + " ";
+                    }
                 }
+                System.Console.WriteLine(line0);
                 System.Console.WriteLine(line1);
                 System.Console.WriteLine(line2);
                 System.Console.WriteLine(line3);
                 System.Console.WriteLine(line4);
                 System.Console.WriteLine(line5);
+                System.Console.WriteLine(line6);
                 System.Console.WriteLine();
+                line0 = "";
                 line1 = "";
                 line2 = "";
                 line3 = "";
                 line4 = "";
                 line5 = "";
+                line6 = "";
             }
         }
 
@@ -422,26 +438,41 @@ namespace FFTools {
             NavigatorGraph graph = new NavigatorGraph();
             List <Location> path = new List <Location> (); 
             graph.addLocations(array);
-            //graph.Print();
+            graph.Print();
             Console.ReadLine();
             System.Console.WriteLine("adding location that should already be covered");
             graph.addLocations(array2);
             graph.Print();
-            //Console.ReadLine();
-            //System.Console.WriteLine("adding locations that are not already covered");
-            //graph.addLocations(array3);
-            //graph.Print();
+            Console.ReadLine();
+            System.Console.WriteLine("adding locations that are not already covered");
+            graph.addLocations(array3);
+            graph.Print();
             Console.ReadLine();
             System.Console.WriteLine("Finding path");
-            Location start = new Location((float)3.999,(float)3.999,0);
-            Location end = new Location(1,1,0);
+            float startX = (float) 3.999;
+            float startY = (float) 3.999;
+            int startNodeX, startNodeY;
+            float endX = (float) 1;
+            float endY = (float) 1;
+            int endNodeX, endNodeY;
+            Location start = new Location(startX, startY, 0);
+            Location end = new Location(endX, endY, 0);
+            graph.findLocation(start, out startNodeX, out startNodeY);
+            graph.findLocation(end, out endNodeX, out endNodeY);
             Location obstacle = new Location((float)2.5, (float)3.5, 0);
             graph.markObstacle(obstacle, Move.EtoW);
+            graph.markObstacle(obstacle, Move.StoN);
+            obstacle = new Location ((float)3.5, (float)2.5, 0);
+            graph.markObstacle(obstacle, Move.NtoS);
             path = graph.findPath(start,end);
             System.Console.WriteLine("path find done");
             graph.Print();
+            System.Console.WriteLine("Start: " + start.ToString() + " | Node: " + startNodeX + "," + startNodeY);
+            System.Console.WriteLine("End  : " + end.ToString() + " | Node: " + endNodeX + "," + endNodeY);
             foreach (Location waypoint in path) {
-                System.Console.WriteLine(waypoint.ToString());
+                int wpX, wpY;
+                graph.findLocation(waypoint, out wpX, out wpY);
+                System.Console.WriteLine(waypoint.ToString() + " | Node: " + wpX + "," + wpY);;
             }
             Console.ReadLine();
         }
