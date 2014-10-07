@@ -283,6 +283,10 @@ namespace FFTools {
             System.Console.WriteLine("endX/Y: " + endX + "," + endY);
             System.Console.WriteLine("done finding start/end entries in NavGraph");
             NavGraph[startY][startX].costToNode = 0;
+            //NavGraph[startY][startX].costToTarget = (int)Math.Ceiling(Math.Sqrt(Math.Pow(startX-endX, 2) + Math.Pow(startY-endY, 2)));
+            NavGraph[startY][startX].costToTarget = Math.Abs(startX-endX) + Math.Abs(startY-endY);
+            NavGraph[startY][startX].fromX = startX;
+            NavGraph[startY][startX].fromY = startY;
             int currentX = startX;
             int currentY = startY;
             openNodes.addNew(NavGraph[startY][startX]);
@@ -302,7 +306,8 @@ namespace FFTools {
                     int adjacentY = adjacent[1];
                     int dx = adjacentX - endX;
                     int dy = adjacentY - endY;
-                    int costToTarget = (int)Math.Ceiling(Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2)));
+                    //int costToTarget = (int)Math.Ceiling(Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2)));
+                    int costToTarget = Math.Abs(dx) + Math.Abs(dy);
                     int score = costToNode + costToTarget;
                     System.Console.WriteLine("Node " + adjacent[0] + "," + adjacent[1] + " | Calculated Score: " + score + " | Current Score: " + NavGraph[adjacentY][adjacentX].Score);
                     if (score < NavGraph[adjacentY][adjacentX].Score) {
@@ -348,11 +353,18 @@ namespace FFTools {
             }
 
             //traceback to build path
-            while ((currentX != startX) || (currentY != startY)) {
-                path.Add(NavGraph[currentY][currentX].location);
-                currentX = NavGraph[currentY][currentX].fromX;
-                currentY = NavGraph[currentY][currentX].fromY;
+            System.Console.WriteLine("Building path");
+            System.Console.WriteLine("Start x,y: " + startX + "," + startY);
+            while (!((currentX == startX) && (currentY == startY))) {
+              System.Console.WriteLine("Current x,y: " + currentX + "," + currentY);
+              path.Add(NavGraph[currentY][currentX].location);
+              System.Console.WriteLine("\t From x,y: " + NavGraph[currentY][currentX].fromX + "," + NavGraph[currentY][currentX].fromY);
+              int tmpX = NavGraph[currentY][currentX].fromX;
+              int tmpY = NavGraph[currentY][currentX].fromY;
+              currentX = tmpX;
+              currentY = tmpY;
             }
+            path.Reverse();
             return path;
         }
 
@@ -423,6 +435,8 @@ namespace FFTools {
             System.Console.WriteLine("Finding path");
             Location start = new Location((float)3.999,(float)3.999,0);
             Location end = new Location(1,1,0);
+            Location obstacle = new Location((float)2.5, (float)3.5, 0);
+            graph.markObstacle(obstacle, Move.EtoW);
             path = graph.findPath(start,end);
             System.Console.WriteLine("path find done");
             graph.Print();
