@@ -41,7 +41,7 @@ namespace FFTools {
 
         private void bubbleUp() {
             //start at bottom
-            int index = list.Count - 1; 
+            int index = this.Count;
             if (index <= 1) return;
 
             bool swap = list[index/2].CompareTo(list[index]) >= 0;       //negative: instance precedes obj; zero: same; positive: instance follows obj
