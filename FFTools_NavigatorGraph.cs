@@ -7,7 +7,20 @@ namespace FFTools {
         private const float DIST_PER_GRID = 1;
         private const int BUFFER_MULTIPLIER = 0;    //BUFFER_MULTIPLIER * DIST_PER_GRID is buffer space on edges of graph
         public GraphNode [][] NavGraph = new GraphNode[1][]; //apparently jagged arrays [][] are faster than multidimensional [,]?
+
+        /*
+        NavGraph imagined like this, ex 3x3:
         
+        2  minX, maxY    |              |   maxX, maxY
+        --------------------------------------------------
+        1                |              |
+        --------------------------------------------------
+        0  minX, minY    |              |   maxX, minY
+        --------------------------------------------------
+               0         |      1       |        2   
+        */
+        
+
         //min/max "in game" coordinates represented -- rounded to nearest multiple of DIST_PER_GRID
         //inclusive of min, not inclusive of max [min, max)
         public float minX = float.PositiveInfinity;
@@ -137,15 +150,16 @@ namespace FFTools {
             }
 
             //populate new graph 
-            //initial "in-game" coordinates stored in [0][0] = most negative X, most positive Y + buffers applied
+            //initial "in-game" coordinates stored in [0][0] = most negative X, most negative Y + buffers applied
             float graphX = tmp_minX + DIST_PER_GRID/2;
-            float graphY = tmp_maxY - DIST_PER_GRID/2;
+            float graphY = tmp_minY + DIST_PER_GRID/2;
+            float tmp_graphY = graphY;
             //fill in all grids
             for (int y = 0; y < graphHeight; y++) {
                 float tmp_graphX = graphX;
                 for (int x = 0; x < graphWidth; x++) {
                     int oldX, oldY;
-                    Location new_location = new Location(tmp_graphX, graphY, 0);
+                    Location new_location = new Location(tmp_graphX, tmp_graphY, 0);
                     if(this.findLocation(new_location, out oldX, out oldY)) { 
                     //if location was in old graph, copy old graph properties
                         //System.Console.WriteLine("x: " + x +
@@ -159,7 +173,7 @@ namespace FFTools {
                     }
                     tmp_graphX = tmp_graphX + DIST_PER_GRID;
                 }
-                graphY = graphY - DIST_PER_GRID;
+                tmp_graphY = tmp_graphY + DIST_PER_GRID;
             }
             this.NavGraph = newGraph;
             this.minX = tmp_minX;
@@ -194,8 +208,8 @@ namespace FFTools {
                 //max X,Y is at [0][NavGraph[0].Length]
                 float tmp = location.x - this.minX;
                 outX = (int) Math.Floor((tmp/DIST_PER_GRID));
-                tmp = this.maxY - 1 - location.y;  //-1 because max is not inclusive
-                outY = (int) Math.Ceiling((tmp/DIST_PER_GRID));
+                tmp = location.y - this.minY;  //-1 because max is not inclusive
+                outY = (int) Math.Floor((tmp/DIST_PER_GRID));
                 return true;
             }
             outX = -1;
@@ -215,9 +229,9 @@ namespace FFTools {
             List <int[]> adjacent = new List <int[]> ();
             //4 possibilities
             //North
-            if( (y-1) >= 0) { //check within graph bounds
-                if (NavGraph[y-1][x].canTravelFrom[(int)Move.StoN]) { //check if we can reach node going in this direction
-                    adjacent.Add(new int[] {x,y-1});
+            if( (y+1) < NavGraph.Length) { //check within graph bounds
+                if (NavGraph[y+1][x].canTravelFrom[(int)Move.StoN]) { //check if we can reach node going in this direction
+                    adjacent.Add(new int[] {x,y+1});
                 }
             }
             //East
@@ -227,9 +241,9 @@ namespace FFTools {
                 }
             }
             //South
-            if( (y+1) < NavGraph.Length) { //check within graph bounds
-                if (NavGraph[y+1][x].canTravelFrom[(int)Move.NtoS]) { //check if we can reach node going in this direction
-                    adjacent.Add(new int[] {x,y+1});
+            if( (y-1) >= 0) { //check within graph bounds
+                if (NavGraph[y-1][x].canTravelFrom[(int)Move.NtoS]) { //check if we can reach node going in this direction
+                    adjacent.Add(new int[] {x,y-1});
                 }
             }
             //West
@@ -304,7 +318,7 @@ namespace FFTools {
                 String line3 = "";
                 String line4 = "";
                 String line5 = "";
-                for (int y = 0; y < this.NavGraph.Length; y++) {
+                for (int y = this.NavGraph.Length-1; y >= 0; y--) {
                     for (int x = 0; x < this.NavGraph[y].Length; x++) {
                         line1 = line1 + "\t" + this.NavGraph[y][x].location.x.ToString("n1");
                         line2 = line2 + "\t" + this.NavGraph[y][x].location.y.ToString("n1");
@@ -344,17 +358,17 @@ namespace FFTools {
 
         //print graph contents
         public void Print() {
-            String line1 = "";
-            String line2 = "";
-            String line3 = "";
-            String line4 = "";
-            String line5 = "";
             System.Console.WriteLine("minY: "+ this.minY + 
                                      " | maxY: " + this.maxY + 
                                      " | minX: " + this.minX + 
                                      " | maxX: " + this.maxX);
 
-            for (int y = 0; y < this.NavGraph.Length; y++) {
+            String line1 = "";
+            String line2 = "";
+            String line3 = "";
+            String line4 = "";
+            String line5 = "";
+            for (int y = this.NavGraph.Length-1; y >= 0; y--) {
                 for (int x = 0; x < this.NavGraph[y].Length; x++) {
                     line1 = line1 + "\t" + this.NavGraph[y][x].location.x.ToString("n1");
                     line2 = line2 + "\t" + this.NavGraph[y][x].location.y.ToString("n1");
