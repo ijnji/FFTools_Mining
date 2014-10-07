@@ -91,9 +91,9 @@ namespace FFTools {
             //only need 4 corners of old graph to build encompassing new graph
             if(this.Size != 0) {
                 locations.Add(this.NavGraph[0][0].location);
-                locations.Add(this.NavGraph[0][NavGraph.Length-1].location);
-                locations.Add(this.NavGraph[NavGraph[0].Length-1][0].location);
-                locations.Add(this.NavGraph[NavGraph[0].Length-1][NavGraph.Length-1].location);
+                locations.Add(this.NavGraph[0][NavGraph[0].Length-1].location);
+                locations.Add(this.NavGraph[NavGraph.Length-1][0].location);
+                locations.Add(this.NavGraph[NavGraph.Length-1][NavGraph[0].Length-1].location);
             }
 
             //find dimensions in "in-game" units to hold all locations
@@ -144,36 +144,31 @@ namespace FFTools {
             int graphHeight = (int) (totalY/DIST_PER_GRID);
 
             //create new graph 
-            GraphNode[][] newGraph = new GraphNode[graphHeight][];
-            for (int y = 0; y < graphHeight; y++) {
-                newGraph[y] = new GraphNode[graphWidth];
+            GraphNode[][] newGraph = new GraphNode[graphWidth][];
+            for (int x = 0; x < graphWidth; x++) {
+                newGraph[x] = new GraphNode[graphHeight];
             }
 
             //populate new graph 
             //initial "in-game" coordinates stored in [0][0] = most negative X, most negative Y + buffers applied
             float graphX = tmp_minX + DIST_PER_GRID/2;
             float graphY = tmp_minY + DIST_PER_GRID/2;
-            float tmp_graphY = graphY;
+            float tmp_graphX = graphX;
             //fill in all grids
-            for (int y = 0; y < graphHeight; y++) {
-                float tmp_graphX = graphX;
-                for (int x = 0; x < graphWidth; x++) {
+            for (int x = 0; x < graphWidth; x++) {
+                float tmp_graphY = graphY;
+                for (int y = 0; y < graphHeight; y++) {
                     int oldX, oldY;
                     Location new_location = new Location(tmp_graphX, tmp_graphY, 0);
                     if(this.findLocation(new_location, out oldX, out oldY)) { 
-                    //if location was in old graph, copy old graph properties
-                        //System.Console.WriteLine("x: " + x +
-                        //                      " y: " + y +
-                        //                      " oldX: " + oldX + 
-                        //                      " oldY: " + oldY);
-                        newGraph[y][x] = this.NavGraph[oldY][oldX];
+                        newGraph[x][y] = this.NavGraph[oldX][oldY];
                     }
                     else {
-                        newGraph[y][x] = new GraphNode(new_location, true, true, true, true);    //NavGraph Z coordinates aren't used
+                        newGraph[x][y] = new GraphNode(new_location, true, true, true, true);    //NavGraph Z coordinates aren't used
                     }
-                    tmp_graphX = tmp_graphX + DIST_PER_GRID;
+                    tmp_graphY = tmp_graphY + DIST_PER_GRID;
                 }
-                tmp_graphY = tmp_graphY + DIST_PER_GRID;
+                tmp_graphX = tmp_graphX + DIST_PER_GRID;
             }
             this.NavGraph = newGraph;
             this.minX = tmp_minX;
@@ -220,7 +215,7 @@ namespace FFTools {
         public void markObstacle (Location location, Move direction) {
             int x, y;
             if (this.findLocation(location, out x, out y))
-                this.NavGraph[y][x].canTravelFrom[(int) direction] = false;
+                this.NavGraph[x][y].canTravelFrom[(int) direction] = false;
             else
                 System.Console.WriteLine("Obstacle unmarkable, does not exist in graph: " + location.ToString());
         }
@@ -229,26 +224,26 @@ namespace FFTools {
             List <int[]> adjacent = new List <int[]> ();
             //4 possibilities
             //North
-            if( (y+1) < NavGraph.Length) { //check within graph bounds
-                if (NavGraph[y+1][x].canTravelFrom[(int)Move.StoN]) { //check if we can reach node going in this direction
+            if( (y+1) < NavGraph[0].Length) { //check within graph bounds
+                if (NavGraph[x][y+1].canTravelFrom[(int)Move.StoN]) { //check if we can reach node going in this direction
                     adjacent.Add(new int[] {x,y+1});
                 }
             }
             //East
-            if( (x+1) < NavGraph[0].Length) { //check within graph bounds
-                if (NavGraph[y][x+1].canTravelFrom[(int)Move.WtoE]) { //check if we can reach node going in this direction
+            if( (x+1) < NavGraph.Length) { //check within graph bounds
+                if (NavGraph[x+1][y].canTravelFrom[(int)Move.WtoE]) { //check if we can reach node going in this direction
                     adjacent.Add(new int[] {x+1,y});
                 }
             }
             //South
             if( (y-1) >= 0) { //check within graph bounds
-                if (NavGraph[y-1][x].canTravelFrom[(int)Move.NtoS]) { //check if we can reach node going in this direction
+                if (NavGraph[x][y-1].canTravelFrom[(int)Move.NtoS]) { //check if we can reach node going in this direction
                     adjacent.Add(new int[] {x,y-1});
                 }
             }
             //West
             if( (x-1) >= 0) { //check within graph bounds
-                if (NavGraph[y][x-1].canTravelFrom[(int)Move.EtoW]) { //check if we can reach node going in this direction
+                if (NavGraph[x-1][y].canTravelFrom[(int)Move.EtoW]) { //check if we can reach node going in this direction
                     adjacent.Add(new int[] {x-1,y});
                 }
             }
@@ -265,12 +260,12 @@ namespace FFTools {
             List <Location> path = new List <Location> ();
             PriorityQueue <GraphNode> openNodes = new PriorityQueue <GraphNode> ();
             //reset all scores to MaxValue, fromX/formY to -1
-            for (int y = 0; y < NavGraph.Length; y++) {
-                for (int x = 0; x < NavGraph[0].Length; x++) {
-                    NavGraph[y][x].costToNode = int.MaxValue;
-                    NavGraph[y][x].costToTarget = int.MaxValue;
-                    NavGraph[y][x].fromX = -1;
-                    NavGraph[y][x].fromY = -1;
+            for (int x = 0; x < NavGraph.Length; x++) {
+                for (int y = 0; y < NavGraph[0].Length; y++) {
+                    NavGraph[x][y].costToNode = int.MaxValue;
+                    NavGraph[x][y].costToTarget = int.MaxValue;
+                    NavGraph[x][y].fromX = -1;
+                    NavGraph[x][y].fromY = -1;
                 }
             }
             System.Console.WriteLine("done clearing cost and fromX/Y values");
@@ -287,12 +282,12 @@ namespace FFTools {
             //dont use direct distance since we can't currently travel diagonally in graph
             //NavGraph[startY][startX].costToTarget = (int)Math.Ceiling(Math.Sqrt(Math.Pow(startX-endX, 2) + Math.Pow(startY-endY, 2)));
             //use min # of grids needed to traverse to target assuming no obstacles
-            NavGraph[startY][startX].costToTarget = Math.Abs(startX-endX) + Math.Abs(startY-endY);
-            NavGraph[startY][startX].fromX = startX;
-            NavGraph[startY][startX].fromY = startY;
+            NavGraph[startX][startY].costToTarget = Math.Abs(startX-endX) + Math.Abs(startY-endY);
+            NavGraph[startX][startY].fromX = startX;
+            NavGraph[startX][startY].fromY = startY;
             int currentX = startX;
             int currentY = startY;
-            openNodes.addNew(NavGraph[startY][startX]);
+            openNodes.addNew(NavGraph[startX][startY]);
             while (openNodes.Count > 0) {
                 GraphNode currentNode = openNodes.removeTop();
                 System.Console.WriteLine("Finding currentNode");
@@ -312,14 +307,14 @@ namespace FFTools {
                     //int costToTarget = (int)Math.Ceiling(Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2)));
                     int costToTarget = Math.Abs(dx) + Math.Abs(dy);
                     int score = costToNode + costToTarget;
-                    System.Console.WriteLine("Node " + adjacent[0] + "," + adjacent[1] + " | Calculated Score: " + score + " | Current Score: " + NavGraph[adjacentY][adjacentX].Score);
-                    if (score < NavGraph[adjacentY][adjacentX].Score) {
+                    System.Console.WriteLine("Node " + adjacent[0] + "," + adjacent[1] + " | Calculated Score: " + score + " | Current Score: " + NavGraph[adjacentX][adjacentY].Score);
+                    if (score < NavGraph[adjacentX][adjacentY].Score) {
                         System.Console.WriteLine("\tAdding " + adjacentX + "," + adjacentY);
-                        NavGraph[adjacentY][adjacentX].costToTarget = costToTarget;
-                        NavGraph[adjacentY][adjacentX].costToNode = costToNode;
-                        NavGraph[adjacentY][adjacentX].fromX = currentX;
-                        NavGraph[adjacentY][adjacentX].fromY = currentY;
-                        openNodes.addNew(NavGraph[adjacentY][adjacentX]);
+                        NavGraph[adjacentX][adjacentY].costToTarget = costToTarget;
+                        NavGraph[adjacentX][adjacentY].costToNode = costToNode;
+                        NavGraph[adjacentX][adjacentY].fromX = currentX;
+                        NavGraph[adjacentX][adjacentY].fromY = currentY;
+                        openNodes.addNew(NavGraph[adjacentX][adjacentY]);
                     }
                 }
                 this.Print();
@@ -331,10 +326,10 @@ namespace FFTools {
             System.Console.WriteLine("Start x,y: " + startX + "," + startY);
             while (!((currentX == startX) && (currentY == startY))) {
               System.Console.WriteLine("Current x,y: " + currentX + "," + currentY);
-              path.Add(NavGraph[currentY][currentX].location);
-              System.Console.WriteLine("\t From x,y: " + NavGraph[currentY][currentX].fromX + "," + NavGraph[currentY][currentX].fromY);
-              int tmpX = NavGraph[currentY][currentX].fromX;
-              int tmpY = NavGraph[currentY][currentX].fromY;
+              path.Add(NavGraph[currentX][currentY].location);
+              System.Console.WriteLine("\t From x,y: " + NavGraph[currentX][currentY].fromX + "," + NavGraph[currentX][currentY].fromY);
+              int tmpX = NavGraph[currentX][currentY].fromX;
+              int tmpY = NavGraph[currentX][currentY].fromY;
               currentX = tmpX;
               currentY = tmpY;
             }
@@ -355,8 +350,8 @@ namespace FFTools {
             String line4 = "";
             String line5 = "";
             String line6 = "";
-            for (int y = this.NavGraph.Length-1; y >= 0; y--) {
-                for (int x = 0; x < this.NavGraph[y].Length; x++) {
+            for (int y = this.NavGraph[0].Length-1; y >= 0; y--) {
+                for (int x = 0; x < this.NavGraph.Length; x++) {
                     line0 = line0 + "\t";
                     line1 = line1 + "\t";
                     line2 = line2 + "\t";
@@ -364,10 +359,10 @@ namespace FFTools {
                     line4 = line4 + "\t";
                     line5 = line5 + "\t";
                     line6 = line6 + "\t";
-                    if (!NavGraph[y][x].canTravelFrom[(int)Move.NtoS]) {
+                    if (!NavGraph[x][y].canTravelFrom[(int)Move.NtoS]) {
                         line0 = line0 + "-------";
                     }
-                    if (!NavGraph[y][x].canTravelFrom[(int)Move.WtoE]) {
+                    if (!NavGraph[x][y].canTravelFrom[(int)Move.WtoE]) {
                         line1 = line1 + "|";
                         line2 = line2 + "|";
                         line3 = line3 + "|";
@@ -380,21 +375,21 @@ namespace FFTools {
                         line4 = line4 + " ";
                         line5 = line5 + " ";
                     }
-                    if (!NavGraph[y][x].canTravelFrom[(int)Move.StoN]) {
+                    if (!NavGraph[x][y].canTravelFrom[(int)Move.StoN]) {
                         line6 = line6 + "-------";
                     }
-                    line1 = line1 + this.NavGraph[y][x].location.x.ToString("n1");
-                    line2 = line2 + this.NavGraph[y][x].location.y.ToString("n1");
-                    if(this.NavGraph[y][x].costToNode != int.MaxValue)
-                        line3 = line3 + this.NavGraph[y][x].costToNode;
+                    line1 = line1 + this.NavGraph[x][y].location.x.ToString("n1");
+                    line2 = line2 + this.NavGraph[x][y].location.y.ToString("n1");
+                    if(this.NavGraph[x][y].costToNode != int.MaxValue)
+                        line3 = line3 + this.NavGraph[x][y].costToNode;
                     else
                         line3 = line3 + "Max";
-                    if(this.NavGraph[y][x].costToTarget != int.MaxValue)
-                        line4 = line4 + this.NavGraph[y][x].costToTarget;
+                    if(this.NavGraph[x][y].costToTarget != int.MaxValue)
+                        line4 = line4 + this.NavGraph[x][y].costToTarget;
                     else
                         line4 = line4 + "Max";
-                    line5 = line5 + this.NavGraph[y][x].fromX+","+this.NavGraph[y][x].fromY;
-                    if (!NavGraph[y][x].canTravelFrom[(int)Move.EtoW])
+                    line5 = line5 + this.NavGraph[x][y].fromX+","+this.NavGraph[x][y].fromY;
+                    if (!NavGraph[x][y].canTravelFrom[(int)Move.EtoW])
                     {
                         line1 = line1 + "|";
                         line2 = line2 + "|";
