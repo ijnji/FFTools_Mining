@@ -2,32 +2,32 @@ using System;
 using System.Collections.Generic;
 
 namespace FFTools {
-	public class PriorityQueue <T> where T : IComparable {
+    public class PriorityQueue <T> where T : IComparable {
         //priority queue implemented with list starting at index 1 for easier maths
         //minimum value has highest priority
         //parent at i
         //left child at 2i
         //right child at 2i+1
-		protected List <T> list;
-		
-		public PriorityQueue() {
-			list = new List <T> ();
+        protected List <T> list;
+        
+        public PriorityQueue() {
+            list = new List <T> ();
             list.Add(default (T)); //dummy at index 0
-		}
+        }
 
-		public int Count {
-			get {
+        public int Count {
+            get {
                 return list.Count - 1;
             }
-		}
+        }
 
-		public void addNew(T newEntry) {
-			list.Add(newEntry);
-			bubbleUp();
-		}
+        public void addNew(T newEntry) {
+            list.Add(newEntry);
+            bubbleUp();
+        }
 
-		public T removeTop() {
-			if(this.Count == 0)
+        public T removeTop() {
+            if(this.Count == 0)
                 return default(T);
 
             T returnT = list[1];
@@ -37,7 +37,7 @@ namespace FFTools {
             percolateDown();
 
             return returnT;
-		}
+        }
 
         private void bubbleUp() {
             //start at bottom
@@ -52,7 +52,7 @@ namespace FFTools {
                 list[index/2] = temp;
                 index = index / 2;
                 swap = list[index/2].CompareTo(list[index]) >= 0;       //negative: instance precedes obj; zero: same; positive: instance follows obj
-                                                                         //using >= so that latest addition takes priority (greedy)
+                                                                        //using >= so that latest addition takes priority (greedy)
             }
         }
 
@@ -102,5 +102,5 @@ namespace FFTools {
                 swapRight = checkRight > 0;
             }
         }
-	}
+    }
 }
