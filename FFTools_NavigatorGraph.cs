@@ -277,10 +277,10 @@ namespace FFTools {
             findLocation(end, out endX, out endY);
             System.Console.WriteLine("endX/Y: " + endX + "," + endY);
             System.Console.WriteLine("done finding start/end entries in NavGraph");
-            NavGraph[startY][startX].costToNode = 0;
+            NavGraph[startX][startY].costToNode = 0;
             //heuristic
             //dont use direct distance since we can't currently travel diagonally in graph
-            //NavGraph[startY][startX].costToTarget = (int)Math.Ceiling(Math.Sqrt(Math.Pow(startX-endX, 2) + Math.Pow(startY-endY, 2)));
+            //NavGraph[startX][startY].costToTarget = (int)Math.Ceiling(Math.Sqrt(Math.Pow(startX-endX, 2) + Math.Pow(startY-endY, 2)));
             //use min # of grids needed to traverse to target assuming no obstacles
             NavGraph[startX][startY].costToTarget = Math.Abs(startX-endX) + Math.Abs(startY-endY);
             NavGraph[startX][startY].fromX = startX;
