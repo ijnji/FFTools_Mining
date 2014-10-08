@@ -60,20 +60,32 @@ namespace FFTools {
             int index = 1; //start at top
             if (this.Count <= 1) return;
 
-            int checkLeft, checkRight;
+            bool leftExists, rightExists;
+            int checkLeft, checkRight, checkLvsR;
             bool swapLeft, swapRight;
-            if ((2*index) > this.Count) {
-               checkLeft = -1; 
-            } else {
-                checkLeft = list[index].CompareTo(list[2*index]);           //negative: instance precedes obj; zero: same; positive: instance follows obj
+
+            leftExists = (2*index) <= this.Count;
+            rightExists = (2*index + 1) <= this.Count;
+
+            swapLeft = false; swapRight = false;
+            if (leftExists) {
+                checkLeft = list[index].CompareTo(list[2*index]);
+                swapLeft = checkLeft > 0;
             }
-            if ((2*index + 1) > this.Count) {
-                checkRight = -1;
-            } else {
+            if (rightExists) {
                 checkRight = list[index].CompareTo(list[2*index + 1]);
+                swapRight = checkRight > 0;
             }
-            swapLeft = checkLeft > 0;
-            swapRight = checkRight > 0;
+            if(leftExists && rightExists) {
+                checkLvsR = list[2*index].CompareTo(list[2*index + 1]);
+                if (checkLvsR < 0) {
+                    //left has higher priority
+                    swapRight = false;
+                } else {
+                    //right has higher priority
+                    swapLeft = false;
+                }
+            }
 
             while(swapLeft || swapRight) {
                 if (swapRight) {
@@ -88,18 +100,29 @@ namespace FFTools {
                     list[2*index] = temp;
                     index = 2*index;
                 }
-                if ((2*index) > this.Count) {
-                   checkLeft = -1; 
-                } else {
-                    checkLeft = list[index].CompareTo(list[2*index]);           //negative: instance precedes obj; zero: same; positive: instance follows obj
+       
+                leftExists = (2*index) <= this.Count;
+                rightExists = (2*index + 1) <= this.Count;
+
+                swapLeft = false; swapRight = false;
+                if (leftExists) {
+                    checkLeft = list[index].CompareTo(list[2*index]);
+                    swapLeft = checkLeft > 0;
                 }
-                if ((2*index + 1) > this.Count) {
-                    checkRight = -1;
-                } else {
+                if (rightExists) {
                     checkRight = list[index].CompareTo(list[2*index + 1]);
+                    swapRight = checkRight > 0;
                 }
-                swapLeft = checkLeft > 0;
-                swapRight = checkRight > 0;
+                if(leftExists && rightExists) {
+                    checkLvsR = list[2*index].CompareTo(list[2*index + 1]);
+                    if (checkLvsR < 0) {
+                        //left has higher priority
+                        swapRight = false;
+                    } else {
+                        //right has higher priority
+                        swapLeft = false;
+                    }
+                }
             }
         }
     }
