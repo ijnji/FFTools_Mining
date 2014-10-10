@@ -336,7 +336,7 @@ namespace FFTools {
                     int dx = adjacentX - endX;
                     int dy = adjacentY - endY;
                     //heuristic if diagonals allowed;
-                    int costToTarget = (int)Math.Round(Math.Sqrt(Math.Pow(startX-endX, 2) + Math.Pow(startY-endY, 2)), MidpointRounding.AwayFromZero);
+                    int costToTarget = (int)Math.Round(Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2)), MidpointRounding.AwayFromZero);
                     //heuristic if diagonals not allowed;
                     //int costToTarget = Math.Abs(dx) + Math.Abs(dy);
                     int score = costToNode + costToTarget;
