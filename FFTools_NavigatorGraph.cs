@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FFTools {
     public class NavigatorGraph {
-        public enum Move {NtoS, StoN, EtoW, WtoE};
+        public enum Move {NtoS, StoN, EtoW, WtoE, NWtoSE, NEtoSW, SEtoNW, SWtoNE};
         private const float DIST_PER_GRID = 1;
         private const int BUFFER_MULTIPLIER = 0;    //BUFFER_MULTIPLIER * DIST_PER_GRID is buffer space on edges of graph
         public GraphNode [][] NavGraph = new GraphNode[1][]; //apparently jagged arrays [][] are faster than multidimensional [,]?
@@ -45,9 +45,17 @@ namespace FFTools {
                     return (costToNode == int.MaxValue) || (costToTarget == int.MaxValue) ? int.MaxValue :  costToNode + costToTarget;
                 }
             } 
-            public GraphNode(Location location, bool ns, bool sn, bool ew, bool we) {
+            public GraphNode(Location location, bool ns, bool sn, bool ew, bool we, bool nwse, bool nesw, bool senw, bool swne) {
                 this.location = location;
-                canTravelFrom = new bool[] {ns, sn, ew, we};
+                canTravelFrom = new bool[] {ns, sn, ew, we, nwse, nesw, senw, swne};
+                costToNode = int.MaxValue;
+                costToTarget = int.MaxValue;
+                fromX = -1;
+                fromY = -1;
+            }
+            public GraphNode(Location location) {
+                this.location = location;
+                canTravelFrom = new bool[] {true, true, true, true, true, true, true, true};
                 costToNode = int.MaxValue;
                 costToTarget = int.MaxValue;
                 fromX = -1;
@@ -164,7 +172,7 @@ namespace FFTools {
                         newGraph[x][y] = this.NavGraph[oldX][oldY];
                     }
                     else {
-                        newGraph[x][y] = new GraphNode(new_location, true, true, true, true);    //NavGraph Z coordinates aren't used
+                        newGraph[x][y] = new GraphNode(new_location);    //NavGraph Z coordinates aren't used
                     }
                     tmp_graphY = tmp_graphY + DIST_PER_GRID;
                 }
@@ -222,11 +230,23 @@ namespace FFTools {
 
         public List <int[]> findAdjacent (int x, int y) {
             List <int[]> adjacent = new List <int[]> ();
-            //4 possibilities
+            //8 possibilities
             //North
             if( (y+1) < NavGraph[0].Length) { //check within graph bounds
                 if (NavGraph[x][y+1].canTravelFrom[(int)Move.StoN]) { //check if we can reach node going in this direction
                     adjacent.Add(new int[] {x,y+1});
+                }
+            }
+            //North West
+            if( ((x-1) >= 0) && ((y+1) < NavGraph[0].Length) ) { //check within graph bounds
+                if (NavGraph[x-1][y].canTravelFrom[(int)Move.SEtoNW]) { //check if we can reach node going in this direction
+                    adjacent.Add(new int[] {x-1,y+1});
+                }
+            }
+            //North East 
+            if( ((x+1) < NavGraph.Length) && ((y+1) < NavGraph[0].Length) ) { //check within graph bounds
+                if (NavGraph[x-1][y].canTravelFrom[(int)Move.SWtoNE]) { //check if we can reach node going in this direction
+                    adjacent.Add(new int[] {x+1,y+1});
                 }
             }
             //East
@@ -239,6 +259,18 @@ namespace FFTools {
             if( (y-1) >= 0) { //check within graph bounds
                 if (NavGraph[x][y-1].canTravelFrom[(int)Move.NtoS]) { //check if we can reach node going in this direction
                     adjacent.Add(new int[] {x,y-1});
+                }
+            }
+            //South West
+            if( ((x-1) >= 0) && ((y-1) >= 0) ) { //check within graph bounds
+                if (NavGraph[x-1][y].canTravelFrom[(int)Move.NEtoSW]) { //check if we can reach node going in this direction
+                    adjacent.Add(new int[] {x-1,y-1});
+                }
+            }
+            //South East 
+            if( ((x+1) < NavGraph.Length) && ((y-1) >= 0) ) { //check within graph bounds
+                if (NavGraph[x-1][y].canTravelFrom[(int)Move.NWtoSE]) { //check if we can reach node going in this direction
+                    adjacent.Add(new int[] {x+1,y-1});
                 }
             }
             //West
@@ -279,10 +311,9 @@ namespace FFTools {
             System.Console.WriteLine("done finding start/end entries in NavGraph");
             NavGraph[startX][startY].costToNode = 0;
             //heuristic
-            //dont use direct distance since we can't currently travel diagonally in graph
-            //NavGraph[startX][startY].costToTarget = (int)Math.Ceiling(Math.Sqrt(Math.Pow(startX-endX, 2) + Math.Pow(startY-endY, 2)));
-            //use min # of grids needed to traverse to target assuming no obstacles
-            NavGraph[startX][startY].costToTarget = Math.Abs(startX-endX) + Math.Abs(startY-endY);
+            NavGraph[startX][startY].costToTarget = (int)Math.Round(Math.Sqrt(Math.Pow(startX-endX, 2) + Math.Pow(startY-endY, 2)), MidpointRounding.AwayFromZero);
+            //use min # of grids needed to traverse to target assuming no obstacles (no diagonals)
+            //NavGraph[startX][startY].costToTarget = Math.Abs(startX-endX) + Math.Abs(startY-endY);
             NavGraph[startX][startY].fromX = startX;
             NavGraph[startX][startY].fromY = startY;
             int currentX = startX;
@@ -304,8 +335,10 @@ namespace FFTools {
                     int adjacentY = adjacent[1];
                     int dx = adjacentX - endX;
                     int dy = adjacentY - endY;
-                    //int costToTarget = (int)Math.Ceiling(Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2)));
-                    int costToTarget = Math.Abs(dx) + Math.Abs(dy);
+                    //heuristic if diagonals allowed;
+                    int costToTarget = (int)Math.Round(Math.Sqrt(Math.Pow(startX-endX, 2) + Math.Pow(startY-endY, 2)), MidpointRounding.AwayFromZero);
+                    //heuristic if diagonals not allowed;
+                    //int costToTarget = Math.Abs(dx) + Math.Abs(dy);
                     int score = costToNode + costToTarget;
                     System.Console.WriteLine("Node " + adjacent[0] + "," + adjacent[1] + " | Calculated Score: " + score + " | Current Score: " + NavGraph[adjacentX][adjacentY].Score);
                     if (score < NavGraph[adjacentX][adjacentY].Score) {
