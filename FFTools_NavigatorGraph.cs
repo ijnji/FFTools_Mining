@@ -35,32 +35,32 @@ namespace FFTools {
             //1: StoN;
             //2: EtoW;
             //3: WtoE;
-            public int costToNode;
-            public int costToTarget;
+            public float costToNode;
+            public float costToTarget;
             public int fromX;
             public int fromY;
            
             //the way cost/score is calculated needs to be adjusted
             //currently it is based on the # of graphNodes traversed, but this treats diagonal = horiz/vertical movement
             //when diagonal should be sqrt(2) times as much in cost           
-            public int Score {
+            public float Score {
                 get {
-                    return (costToNode == int.MaxValue) || (costToTarget == int.MaxValue) ? int.MaxValue :  costToNode + costToTarget;
+                    return (costToNode == float.MaxValue) || (costToTarget == float.MaxValue) ? float.MaxValue :  costToNode + costToTarget;
                 }
             } 
             public GraphNode(Location location, bool ns, bool sn, bool ew, bool we, bool nwse, bool nesw, bool senw, bool swne) {
                 this.location = location;
                 canTravelFrom = new bool[] {ns, sn, ew, we, nwse, nesw, senw, swne};
-                costToNode = int.MaxValue;
-                costToTarget = int.MaxValue;
+                costToNode = float.MaxValue;
+                costToTarget = float.MaxValue;
                 fromX = -1;
                 fromY = -1;
             }
             public GraphNode(Location location) {
                 this.location = location;
                 canTravelFrom = new bool[] {true, true, true, true, true, true, true, true};
-                costToNode = int.MaxValue;
-                costToTarget = int.MaxValue;
+                costToNode = float.MaxValue;
+                costToTarget = float.MaxValue;
                 fromX = -1;
                 fromY = -1;
             }
@@ -69,8 +69,8 @@ namespace FFTools {
                 if (obj == null) return -1;
 
                 GraphNode b = (GraphNode) obj;
-                int instScore = ((costToNode == int.MaxValue) || (costToTarget == int.MaxValue)) ? int.MaxValue : this.costToNode + this.costToTarget;
-                int objScore = ((b.costToNode == int.MaxValue) || (b.costToTarget == int.MaxValue))? int.MaxValue : b.costToNode + b.costToTarget;
+                float instScore = ((costToNode == float.MaxValue) || (costToTarget == float.MaxValue)) ? float.MaxValue : this.costToNode + this.costToTarget;
+                float objScore = ((b.costToNode == float.MaxValue) || (b.costToTarget == float.MaxValue))? float.MaxValue : b.costToNode + b.costToTarget;
                 if (instScore == objScore) return 0;
                 else if (instScore > objScore) return 1;
                 else return -1;
@@ -297,8 +297,8 @@ namespace FFTools {
             //reset all scores to MaxValue, fromX/formY to -1
             for (int x = 0; x < NavGraph.Length; x++) {
                 for (int y = 0; y < NavGraph[0].Length; y++) {
-                    NavGraph[x][y].costToNode = int.MaxValue;
-                    NavGraph[x][y].costToTarget = int.MaxValue;
+                    NavGraph[x][y].costToNode = float.MaxValue;
+                    NavGraph[x][y].costToTarget = float.MaxValue;
                     NavGraph[x][y].fromX = -1;
                     NavGraph[x][y].fromY = -1;
                 }
@@ -314,11 +314,11 @@ namespace FFTools {
             System.Console.WriteLine("done finding start/end entries in NavGraph");
             NavGraph[startX][startY].costToNode = 0;
             //heuristic is minimum # of graphnodes to get from location to target, assuming no obstacles
-            int dx, dy;
+            float dx, dy;
             dx = Math.Abs(startX-endX);
             dy = Math.Abs(startY-endY);
             //heuristic if diagonals allowed
-            NavGraph[startX][startY].costToTarget = (dx > dy) ? dx : dy;
+            NavGraph[startX][startY].costToTarget = Location.findDistanceBetween(NavGraph[startX][startY].location, NavGraph[endX][endY].location);
             //heuristic if diagonals not allowed
             //NavGraph[startX][startY].costToTarget = dx + dy;
             NavGraph[startX][startY].fromX = startX;
@@ -335,18 +335,18 @@ namespace FFTools {
                 System.Console.WriteLine("Current node " + currentX + ", " + currentY);
                 System.Console.WriteLine("# valid adjacent: " + adjacentList.Count);
                 foreach (int[] adjacent in adjacentList) {
-                //Calculate score for adjacent node
-                    int costToNode = currentNode.costToNode + 1;
-                    //Heuristic is just direct distance as if nothing in the way
                     int adjacentX = adjacent[0];
                     int adjacentY = adjacent[1];
+                //Calculate score for adjacent node
+                    float costToNode = currentNode.costToNode + Location.findDistanceBetween(currentNode.location, NavGraph[adjacentX][adjacentY].location);
+                    //Heuristic is just direct distance as if nothing in the way
                     dx = Math.Abs(adjacentX - endX);
                     dy = Math.Abs(adjacentY - endY);
                     //heuristic if diagonals allowed;
-                    int costToTarget = (dx > dy) ? dx : dy;
+                    float costToTarget = Location.findDistanceBetween(NavGraph[adjacentX][adjacentY].location, NavGraph[endX][endY].location);
                     //heuristic if diagonals not allowed;
                     //int costToTarget = dx + dy;
-                    int score = costToNode + costToTarget;
+                    float score = costToNode + costToTarget;
                     System.Console.WriteLine("Node " + adjacent[0] + "," + adjacent[1] + " | Calculated Score: " + score + " | Current Score: " + NavGraph[adjacentX][adjacentY].Score);
                     if (score < NavGraph[adjacentX][adjacentY].Score) {
                         System.Console.WriteLine("\tAdding " + adjacentX + "," + adjacentY);
@@ -417,12 +417,12 @@ namespace FFTools {
                     }
                     line1 = line1 + this.NavGraph[x][y].location.x.ToString("n1");
                     line2 = line2 + this.NavGraph[x][y].location.y.ToString("n1");
-                    if(this.NavGraph[x][y].costToNode != int.MaxValue)
-                        line3 = line3 + this.NavGraph[x][y].costToNode;
+                    if(this.NavGraph[x][y].costToNode != float.MaxValue)
+                        line3 = line3 + this.NavGraph[x][y].costToNode.ToString("n1");
                     else
                         line3 = line3 + "Max";
-                    if(this.NavGraph[x][y].costToTarget != int.MaxValue)
-                        line4 = line4 + this.NavGraph[x][y].costToTarget;
+                    if(this.NavGraph[x][y].costToTarget != float.MaxValue)
+                        line4 = line4 + this.NavGraph[x][y].costToTarget.ToString("n1");
                     else
                         line4 = line4 + "Max";
                     line5 = line5 + this.NavGraph[x][y].fromX+","+this.NavGraph[x][y].fromY;
