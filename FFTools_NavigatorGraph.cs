@@ -40,6 +40,9 @@ namespace FFTools {
             public int fromX;
             public int fromY;
            
+            //the way cost/score is calculated needs to be adjusted
+            //currently it is based on the # of graphNodes traversed, but this treats diagonal = horiz/vertical movement
+            //when diagonal should be sqrt(2) times as much in cost           
             public int Score {
                 get {
                     return (costToNode == int.MaxValue) || (costToTarget == int.MaxValue) ? int.MaxValue :  costToNode + costToTarget;
@@ -315,8 +318,8 @@ namespace FFTools {
             dx = Math.Abs(startX-endX);
             dy = Math.Abs(startY-endY);
             //heuristic if diagonals allowed
-            NavGraph[startX][startY].costToTarget = (dx > dy)? dx : dy;
-            //heuristic if diaganols not allowed
+            NavGraph[startX][startY].costToTarget = (dx > dy) ? dx : dy;
+            //heuristic if diagonals not allowed
             //NavGraph[startX][startY].costToTarget = dx + dy;
             NavGraph[startX][startY].fromX = startX;
             NavGraph[startX][startY].fromY = startY;
