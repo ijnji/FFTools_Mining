@@ -310,10 +310,14 @@ namespace FFTools {
             System.Console.WriteLine("endX/Y: " + endX + "," + endY);
             System.Console.WriteLine("done finding start/end entries in NavGraph");
             NavGraph[startX][startY].costToNode = 0;
-            //heuristic
-            NavGraph[startX][startY].costToTarget = (int)Math.Round(Math.Sqrt(Math.Pow(startX-endX, 2) + Math.Pow(startY-endY, 2)), MidpointRounding.AwayFromZero);
-            //use min # of grids needed to traverse to target assuming no obstacles (no diagonals)
-            //NavGraph[startX][startY].costToTarget = Math.Abs(startX-endX) + Math.Abs(startY-endY);
+            //heuristic is minimum # of graphnodes to get from location to target, assuming no obstacles
+            int dx, dy;
+            dx = Math.Abs(startX-endX);
+            dy = Math.Abs(startY-endY);
+            //heuristic if diagonals allowed
+            NavGraph[startX][startY].costToTarget = (dx > dy)? dx : dy;
+            //heuristic if diaganols not allowed
+            //NavGraph[startX][startY].costToTarget = dx + dy;
             NavGraph[startX][startY].fromX = startX;
             NavGraph[startX][startY].fromY = startY;
             int currentX = startX;
@@ -333,12 +337,12 @@ namespace FFTools {
                     //Heuristic is just direct distance as if nothing in the way
                     int adjacentX = adjacent[0];
                     int adjacentY = adjacent[1];
-                    int dx = adjacentX - endX;
-                    int dy = adjacentY - endY;
+                    dx = Math.Abs(adjacentX - endX);
+                    dy = Math.Abs(adjacentY - endY);
                     //heuristic if diagonals allowed;
-                    int costToTarget = (int)Math.Round(Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2)), MidpointRounding.AwayFromZero);
+                    int costToTarget = (dx > dy) ? dx : dy;
                     //heuristic if diagonals not allowed;
-                    //int costToTarget = Math.Abs(dx) + Math.Abs(dy);
+                    //int costToTarget = dx + dy;
                     int score = costToNode + costToTarget;
                     System.Console.WriteLine("Node " + adjacent[0] + "," + adjacent[1] + " | Calculated Score: " + score + " | Current Score: " + NavGraph[adjacentX][adjacentY].Score);
                     if (score < NavGraph[adjacentX][adjacentY].Score) {
@@ -355,12 +359,9 @@ namespace FFTools {
             }
 
             //traceback to build path
-            System.Console.WriteLine("Building path");
-            System.Console.WriteLine("Start x,y: " + startX + "," + startY);
+            System.Console.WriteLine("Traceback to build path");
             while (!((currentX == startX) && (currentY == startY))) {
-              System.Console.WriteLine("Current x,y: " + currentX + "," + currentY);
               path.Add(NavGraph[currentX][currentY].location);
-              System.Console.WriteLine("\t From x,y: " + NavGraph[currentX][currentY].fromX + "," + NavGraph[currentX][currentY].fromY);
               int tmpX = NavGraph[currentX][currentY].fromX;
               int tmpY = NavGraph[currentX][currentY].fromY;
               currentX = tmpX;
@@ -483,7 +484,7 @@ namespace FFTools {
             float startX = (float) 3.999;
             float startY = (float) 3.999;
             int startNodeX, startNodeY;
-            float endX = (float) 1;
+            float endX = (float) -1;
             float endY = (float) 1;
             int endNodeX, endNodeY;
             Location start = new Location(startX, startY, 0);
