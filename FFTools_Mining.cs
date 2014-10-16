@@ -17,29 +17,44 @@ namespace FFTools {
             if (theMemory.initialize() > 0) Environment.Exit(1);
             // Ready singleton Navigator.
             Navigator theNavigator = new Navigator(theMemory);
+            NavigatorGraph theNavigatorGraph = new NavigatorGraph();
 
             // Get a first read of all data.
             Player thePlayer = theMemory.readPlayer();
             //List<string> theGenDiagList = theMemory.readGeneralDialogueList();
             List<IntPtr> gathNodeAddrList = theMemory.findAddressesOfBytes(gathTypeByteArray);
             List<GatheringNode> theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
+            List<Location> gnlocl = new List<Location>();
+            foreach (GatheringNode gn in theGathNodeList) gnlocl.Add(gn.location);
+            theNavigatorGraph.addLocations(gnlocl);    
             // Start the UI thread.
             MapForm theMapForm = new MapForm();
             Thread formStartThread = new Thread(new ParameterizedThreadStart(formStart));
-            formStartThread.Start(theMapForm);
+            //formStartThread.Start(theMapForm);
             theMapForm.setViewGathNodeList(theGathNodeList);
 
-            // Begin main loop.
-            while (true) {
-                // Read one copy of each data from memory only.
-                thePlayer = theMemory.readPlayer();
-                theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
-
-                theMapForm.setViewPlayer(thePlayer);
-                theMapForm.setViewGathNodeList(theGathNodeList);
-                // Update each 200ms.
-                Thread.Sleep(200);
+            System.Console.WriteLine("MAIN: Player is at " + thePlayer.location);
+            GatheringNode nearestGathNode = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
+            System.Console.WriteLine("MAIN: Nearest gathering node is at " + nearestGathNode.location);
+            List<Location> path = theNavigatorGraph.findPath(thePlayer.location, nearestGathNode.location);
+            System.Console.WriteLine("MAIN: The path to this node is: ");
+            foreach (Location l in path) {
+                System.Console.WriteLine(l);
             }
+
+            // Begin main loop.
+//            while (true) {
+//                // Read one copy of each data from memory only.
+//                thePlayer = theMemory.readPlayer();
+//                theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
+//                // Update with new data.
+//                theMapForm.setViewPlayer(thePlayer);
+//                theMapForm.setViewGathNodeList(theGathNodeList);
+//                theNavigator.update(thePlayer);
+//
+//                // Update each 50ms.
+//                Thread.Sleep(50);
+//            }
 
             //GatheringNode gn = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
             //Queue<GatheringNode> gnHistory = new Queue<GatheringNode>();
@@ -88,70 +103,6 @@ namespace FFTools {
                 Thread.Sleep(5000);
             }
             Thread.Sleep(3000);
-        }
-
-        private static void travelTo(MemoryManager theMemory, Location tLocation) {
-            Player thePlayer = theMemory.readPlayer();
-            
-            if ( thePlayer.findAngleBetween(tLocation) > 0.1 ) {
-                theMemory.sendKeyDownMsg(Keys.A);
-                while ( thePlayer.findAngleBetween(tLocation) > 0.1 ) {
-                    Thread.Sleep(50);
-                    thePlayer = theMemory.readPlayer();
-                }
-                theMemory.sendKeyUpMsg(Keys.A);
-            }
-            if ( thePlayer.findAngleBetween(tLocation) < -0.1 ) {
-                theMemory.sendKeyDownMsg(Keys.D);
-                while ( thePlayer.findAngleBetween(tLocation) < -0.1 ) {
-                    Thread.Sleep(50);
-                    thePlayer = theMemory.readPlayer();
-                }
-                theMemory.sendKeyUpMsg(Keys.D);
-            }
-
-            bool rotating_left = false;
-            bool rotating_right = false;
-            thePlayer = theMemory.readPlayer();
-            while ( Location.findDistanceBetween(thePlayer.location, tLocation) > 2.0 ) {
-                theMemory.sendKeyDownMsg(Keys.W);
-                while ( Location.findDistanceBetween(thePlayer.location, tLocation) > 2.0 ) {
-                    Thread.Sleep(50);
-                    thePlayer = theMemory.readPlayer();
-                    if ( thePlayer.findAngleBetween(tLocation) > 0.1 ) {
-                        theMemory.sendKeyDownMsg(Keys.A);
-                        rotating_left = true;
-                    } else if ( thePlayer.findAngleBetween(tLocation) < -0.1 ) {
-                        theMemory.sendKeyDownMsg(Keys.D);
-                        rotating_right = true;
-                    } else if ( rotating_left ) {
-                        theMemory.sendKeyUpMsg(Keys.A);
-                        rotating_left = false;
-                    } else if ( rotating_right ) {
-                        theMemory.sendKeyUpMsg(Keys.D);
-                        rotating_right = false;
-                    }
-                }
-                theMemory.sendKeyUpMsg(Keys.W);
-            }
-
-            thePlayer = theMemory.readPlayer();
-            if ( thePlayer.findAngleBetween(tLocation) > 0.1 ) {
-                theMemory.sendKeyDownMsg(Keys.A);
-                while ( thePlayer.findAngleBetween(tLocation) > 0.1 ) {
-                    Thread.Sleep(50);
-                    thePlayer = theMemory.readPlayer();
-                }
-                theMemory.sendKeyUpMsg(Keys.A);
-            }
-            if ( thePlayer.findAngleBetween(tLocation) < -0.1 ) {
-                theMemory.sendKeyDownMsg(Keys.D);
-                while ( thePlayer.findAngleBetween(tLocation) < -0.1 ) {
-                    Thread.Sleep(50);
-                    thePlayer = theMemory.readPlayer();
-                }
-                theMemory.sendKeyUpMsg(Keys.D);
-            }
         }
 
         private static GatheringNode nearestVisibleGatheringNode(Player thePlayer, List<GatheringNode> theGathNodeList) {

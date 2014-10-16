@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace FFTools {
     public class NavigatorGraph {
         public enum Move {NtoS, StoN, EtoW, WtoE, NWtoSE, NEtoSW, SEtoNW, SWtoNE};
-        private const float DIST_PER_GRID = 1;
+        private const float DIST_PER_GRID = 5;
         private const int BUFFER_MULTIPLIER = 0;    //BUFFER_MULTIPLIER * DIST_PER_GRID is buffer space on edges of graph
         public GraphNode [][] NavGraph = new GraphNode[1][]; //apparently jagged arrays [][] are faster than multidimensional [,]?
 
@@ -90,7 +90,7 @@ namespace FFTools {
             }
         }
 
-        public void addLocations (Location[] newLocations) {
+        public void addLocations (List<Location> newLocations) {
             List <Location> locations = new List <Location> ();
             foreach (Location location in newLocations) {
                 if (!this.findLocation(location))
@@ -459,57 +459,57 @@ namespace FFTools {
             }
         }
 
-        public static void Main() {
-
-            //NavigatorGraph test creation
-            Location one = new Location(1, 1, 0);
-            Location two = new Location(4, 4, 0);
-            Location three = new Location(3, 2, 0);
-            Location four = new Location(4, 8, 0);
-            Location five = new Location(-2, -2, 0);
-            Location[] array = {one, two};
-            Location[] array2 = {three};
-            Location[] array3 = {four, five};
-            NavigatorGraph graph = new NavigatorGraph();
-            List <Location> path = new List <Location> (); 
-            graph.addLocations(array);
-            graph.Print();
-            Console.ReadLine();
-            System.Console.WriteLine("adding location that should already be covered");
-            graph.addLocations(array2);
-            graph.Print();
-            Console.ReadLine();
-            System.Console.WriteLine("adding locations that are not already covered");
-            graph.addLocations(array3);
-            graph.Print();
-            Console.ReadLine();
-            System.Console.WriteLine("Finding path");
-            float startX = (float) 3.999;
-            float startY = (float) 3.999;
-            int startNodeX, startNodeY;
-            float endX = (float) -1;
-            float endY = (float) 1;
-            int endNodeX, endNodeY;
-            Location start = new Location(startX, startY, 0);
-            Location end = new Location(endX, endY, 0);
-            graph.findLocation(start, out startNodeX, out startNodeY);
-            graph.findLocation(end, out endNodeX, out endNodeY);
-            Location obstacle = new Location((float)2.5, (float)3.5, 0);
-            graph.markObstacle(obstacle, Move.EtoW);
-            graph.markObstacle(obstacle, Move.StoN);
-            obstacle = new Location ((float)3.5, (float)2.5, 0);
-            graph.markObstacle(obstacle, Move.NtoS);
-            path = graph.findPath(start,end);
-            System.Console.WriteLine("path find done");
-            graph.Print();
-            System.Console.WriteLine("Start: " + start.ToString() + " | Node: " + startNodeX + "," + startNodeY);
-            System.Console.WriteLine("End  : " + end.ToString() + " | Node: " + endNodeX + "," + endNodeY);
-            foreach (Location waypoint in path) {
-                int wpX, wpY;
-                graph.findLocation(waypoint, out wpX, out wpY);
-                System.Console.WriteLine(waypoint.ToString() + " | Node: " + wpX + "," + wpY);;
-            }
-            Console.ReadLine();
-        }
+//        public static void Main() {
+//
+//            //NavigatorGraph test creation
+//            Location one = new Location(1, 1, 0);
+//            Location two = new Location(4, 4, 0);
+//            Location three = new Location(3, 2, 0);
+//            Location four = new Location(4, 8, 0);
+//            Location five = new Location(-2, -2, 0);
+//            Location[] array = {one, two};
+//            Location[] array2 = {three};
+//            Location[] array3 = {four, five};
+//            NavigatorGraph graph = new NavigatorGraph();
+//            List <Location> path = new List <Location> (); 
+//            graph.addLocations(array);
+//            graph.Print();
+//            Console.ReadLine();
+//            System.Console.WriteLine("adding location that should already be covered");
+//            graph.addLocations(array2);
+//            graph.Print();
+//            Console.ReadLine();
+//            System.Console.WriteLine("adding locations that are not already covered");
+//            graph.addLocations(array3);
+//            graph.Print();
+//            Console.ReadLine();
+//            System.Console.WriteLine("Finding path");
+//            float startX = (float) 3.999;
+//            float startY = (float) 3.999;
+//            int startNodeX, startNodeY;
+//            float endX = (float) -1;
+//            float endY = (float) 1;
+//            int endNodeX, endNodeY;
+//            Location start = new Location(startX, startY, 0);
+//            Location end = new Location(endX, endY, 0);
+//            graph.findLocation(start, out startNodeX, out startNodeY);
+//            graph.findLocation(end, out endNodeX, out endNodeY);
+//            Location obstacle = new Location((float)2.5, (float)3.5, 0);
+//            graph.markObstacle(obstacle, Move.EtoW);
+//            graph.markObstacle(obstacle, Move.StoN);
+//            obstacle = new Location ((float)3.5, (float)2.5, 0);
+//            graph.markObstacle(obstacle, Move.NtoS);
+//            path = graph.findPath(start,end);
+//            System.Console.WriteLine("path find done");
+//            graph.Print();
+//            System.Console.WriteLine("Start: " + start.ToString() + " | Node: " + startNodeX + "," + startNodeY);
+//            System.Console.WriteLine("End  : " + end.ToString() + " | Node: " + endNodeX + "," + endNodeY);
+//            foreach (Location waypoint in path) {
+//                int wpX, wpY;
+//                graph.findLocation(waypoint, out wpX, out wpY);
+//                System.Console.WriteLine(waypoint.ToString() + " | Node: " + wpX + "," + wpY);;
+//            }
+//            Console.ReadLine();
+//        }
     }
 }
