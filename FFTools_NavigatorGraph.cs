@@ -30,21 +30,20 @@ namespace FFTools {
 
         public struct GraphNode : IComparable {
             public Location location;
-            public bool[] canTravelFrom;
-            //0: NtoS;
-            //1: StoN;
-            //2: EtoW;
-            //3: WtoE;
-            public float costToNode;
+            public bool[] canTravelFrom; //index into array using Move enumeration
+
+            //accumulated cost to reach current node in "in-game" units
+            public float costToNode;     
+            //heuristic assumes direct travel (no obstacles) and is the "in-game" distance from middle of current GraphNode to middle of ending GraphNode
             public float costToTarget;
+            
+            //index into NavGraph array indicating from which GraphNode we traveled from to get to current GraphNode
             public int fromX;
             public int fromY;
            
-            //the way cost/score is calculated needs to be adjusted
-            //currently it is based on the # of graphNodes traversed, but this treats diagonal = horiz/vertical movement
-            //when diagonal should be sqrt(2) times as much in cost           
             public float Score {
                 get {
+                    //score calc + overflow check
                     return (costToNode == float.MaxValue) || (costToTarget == float.MaxValue) ? float.MaxValue :  costToNode + costToTarget;
                 }
             } 
@@ -64,7 +63,7 @@ namespace FFTools {
                 fromX = -1;
                 fromY = -1;
             }
-
+            //GraphNode implements IComparable
             public int CompareTo (Object obj) { //-1 inst precedes obj; 0 same; +1 inst follows obj
                 if (obj == null) return -1;
 
@@ -79,7 +78,7 @@ namespace FFTools {
 
         public NavigatorGraph() {
         }
-
+        //# of GraphNodes in NavGraph
         public int Size {
             get {
                 if(this.NavGraph == null)
@@ -150,7 +149,7 @@ namespace FFTools {
             totalX = tmp_maxX - tmp_minX + 2*BUFFER_MULTIPLIER*DIST_PER_GRID;
             totalY = tmp_maxY - tmp_minY + 2*BUFFER_MULTIPLIER*DIST_PER_GRID;
 
-            //# of grid square things
+            //# of GraphNodes in each dimension
             int graphWidth = (int) Math.Ceiling(totalX/DIST_PER_GRID);
             int graphHeight = (int) Math.Ceiling(totalY/DIST_PER_GRID);
 
@@ -165,17 +164,17 @@ namespace FFTools {
             float graphX = tmp_minX + DIST_PER_GRID/2;
             float graphY = tmp_minY + DIST_PER_GRID/2;
             float tmp_graphX = graphX;
-            //fill in all grids
+            //fill in all GraphNodes 
             for (int x = 0; x < graphWidth; x++) {
                 float tmp_graphY = graphY;
                 for (int y = 0; y < graphHeight; y++) {
                     int oldX, oldY;
-                    Location new_location = new Location(tmp_graphX, tmp_graphY, 0);
+                    Location new_location = new Location(tmp_graphX, tmp_graphY, 0);    //NavGraph Z coordinates aren't used
                     if(this.findLocation(new_location, out oldX, out oldY)) { 
                         newGraph[x][y] = this.NavGraph[oldX][oldY];
                     }
                     else {
-                        newGraph[x][y] = new GraphNode(new_location);    //NavGraph Z coordinates aren't used
+                        newGraph[x][y] = new GraphNode(new_location);
                     }
                     tmp_graphY = tmp_graphY + DIST_PER_GRID;
                 }
@@ -196,7 +195,7 @@ namespace FFTools {
             }
             return false;
         }
-        //overloaded findLocation to also write out X/Y indices if found
+        //overloaded findLocation to also write out X/Y indices into NavGraph array if found
         public bool findLocation (Location location, out int outX, out int outY) {
             if (this.Size == 0) {
                 outX = -1;
@@ -222,7 +221,7 @@ namespace FFTools {
             outY = -1;
             return false;
         }
-
+        //marks obstacle given location and direction of travel
         public void markObstacle (Location location, Move direction) {
             int x, y;
             if (this.findLocation(location, out x, out y))
@@ -230,7 +229,7 @@ namespace FFTools {
             else
                 System.Console.WriteLine("Obstacle unmarkable, does not exist in graph: " + location.ToString());
         }
-
+        //returns list of adjacent GraphNodes that can be reached from GraphNode at [x][y]
         public List <int[]> findAdjacent (int x, int y) {
             List <int[]> adjacent = new List <int[]> ();
             //8 possibilities
@@ -284,17 +283,17 @@ namespace FFTools {
             }
             return adjacent;
         }
-
+        //overloaded findAdjacent
         public List <int[]> findAdjacent (GraphNode reference) {
             int x, y;
             findLocation(reference.location, out x, out y);
             return findAdjacent(x, y);
         }
-
+        //A* do it.
         public List <Location> findPath (Location start, Location end) {
             List <Location> path = new List <Location> ();
             PriorityQueue <GraphNode> openNodes = new PriorityQueue <GraphNode> ();
-            //reset all scores to MaxValue, fromX/formY to -1
+            //reset all scores to MaxValue, fromX/fromY to -1
             for (int x = 0; x < NavGraph.Length; x++) {
                 for (int y = 0; y < NavGraph[0].Length; y++) {
                     NavGraph[x][y].costToNode = float.MaxValue;
@@ -313,11 +312,7 @@ namespace FFTools {
             System.Console.WriteLine("endX/Y: " + endX + "," + endY);
             System.Console.WriteLine("done finding start/end entries in NavGraph");
             NavGraph[startX][startY].costToNode = 0;
-            //heuristic is minimum # of graphnodes to get from location to target, assuming no obstacles
-            float dx, dy;
-            dx = Math.Abs(startX-endX);
-            dy = Math.Abs(startY-endY);
-            //heuristic if diagonals allowed
+            //heuristic assumes direct travel (no obstacles) and is the "in-game" distance from middle of current GraphNode to middle of ending GraphNode
             NavGraph[startX][startY].costToTarget = Location.findDistanceBetween(NavGraph[startX][startY].location, NavGraph[endX][endY].location);
             //heuristic if diagonals not allowed
             //NavGraph[startX][startY].costToTarget = dx + dy;
@@ -339,10 +334,6 @@ namespace FFTools {
                     int adjacentY = adjacent[1];
                 //Calculate score for adjacent node
                     float costToNode = currentNode.costToNode + Location.findDistanceBetween(currentNode.location, NavGraph[adjacentX][adjacentY].location);
-                    //Heuristic is just direct distance as if nothing in the way
-                    dx = Math.Abs(adjacentX - endX);
-                    dy = Math.Abs(adjacentY - endY);
-                    //heuristic if diagonals allowed;
                     float costToTarget = Location.findDistanceBetween(NavGraph[adjacentX][adjacentY].location, NavGraph[endX][endY].location);
                     //heuristic if diagonals not allowed;
                     //int costToTarget = dx + dy;
