@@ -123,9 +123,9 @@ namespace FFTools {
             //round "in-game" units to nearest DIST_PER_GRID multiple
             if(tmp_minY % DIST_PER_GRID != 0) {
                 if(tmp_minY > 0) 
-                    tmp_minY = tmp_minY - (DIST_PER_GRID - (tmp_minY % DIST_PER_GRID));
+                    tmp_minY = tmp_minY - (tmp_minY % DIST_PER_GRID);
                 else
-                    tmp_minY = tmp_minY - (tmp_minY % (-1*DIST_PER_GRID));
+                    tmp_minY = tmp_minY - (DIST_PER_GRID - (tmp_minY % (-1*DIST_PER_GRID)));
             }
             if(tmp_maxY % DIST_PER_GRID != 0) {        
                 if(tmp_maxY > 0)
@@ -135,9 +135,9 @@ namespace FFTools {
             }
             if(tmp_minX % DIST_PER_GRID != 0) {
                 if(tmp_minX > 0)
-                    tmp_minX = tmp_minX - (DIST_PER_GRID - (tmp_minX % DIST_PER_GRID));
+                    tmp_minX = tmp_minX - (tmp_minX % DIST_PER_GRID);
                 else
-                    tmp_minX = tmp_minX - (tmp_minX % (-1*DIST_PER_GRID));
+                    tmp_minX = tmp_minX - (DIST_PER_GRID - (tmp_minX % (-1*DIST_PER_GRID)));
             }
             if(tmp_maxX % DIST_PER_GRID != 0) {
                 if(tmp_maxX > 0)
