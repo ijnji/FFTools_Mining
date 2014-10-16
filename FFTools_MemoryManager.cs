@@ -52,7 +52,7 @@ namespace FFTools {
         private int FISHBITE_BITE = 0x1;
         private const int GATHNODE_VIS = 0x0;
         private const int GATHNODE_INVIS = 0x80;
-        private const int GATHNODELIST_LENGTH = 0x3000;
+        private const int GATHNODELIST_LENGTH = 0x4000;
 
         // Address bases.
         private Process Proc = null;

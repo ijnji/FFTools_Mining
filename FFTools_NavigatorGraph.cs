@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace FFTools {
     public class NavigatorGraph {
         public enum Move {NtoS, StoN, EtoW, WtoE, NWtoSE, NEtoSW, SEtoNW, SWtoNE};
-        private const float DIST_PER_GRID = 5;
+        private const float DIST_PER_GRID = 5f;
         private const int BUFFER_MULTIPLIER = 0;    //BUFFER_MULTIPLIER * DIST_PER_GRID is buffer space on edges of graph
         public GraphNode [][] NavGraph = new GraphNode[1][]; //apparently jagged arrays [][] are faster than multidimensional [,]?
 
@@ -122,28 +122,28 @@ namespace FFTools {
             }
             //round "in-game" units to nearest DIST_PER_GRID multiple
             if(tmp_minY % DIST_PER_GRID != 0) {
-                if(tmp_minY > 0)
-                    tmp_minY = tmp_minY - (tmp_minY % DIST_PER_GRID);
-                else
+                if(tmp_minY > 0) 
                     tmp_minY = tmp_minY - (DIST_PER_GRID - (tmp_minY % DIST_PER_GRID));
+                else
+                    tmp_minY = tmp_minY - (tmp_minY % (-1*DIST_PER_GRID));
             }
             if(tmp_maxY % DIST_PER_GRID != 0) {        
                 if(tmp_maxY > 0)
-                    tmp_maxY = tmp_maxY - (tmp_maxY % DIST_PER_GRID);
+                    tmp_maxY = tmp_maxY + (DIST_PER_GRID - (tmp_maxY % DIST_PER_GRID));
                 else
-                    tmp_maxY = tmp_maxY - (DIST_PER_GRID - (tmp_maxY % DIST_PER_GRID));
+                    tmp_maxY = tmp_maxY + (tmp_maxY % (-1*DIST_PER_GRID));
             }
             if(tmp_minX % DIST_PER_GRID != 0) {
                 if(tmp_minX > 0)
-                    tmp_minX = tmp_minX - (tmp_minX % DIST_PER_GRID);
-                else
                     tmp_minX = tmp_minX - (DIST_PER_GRID - (tmp_minX % DIST_PER_GRID));
+                else
+                    tmp_minX = tmp_minX - (tmp_minX % (-1*DIST_PER_GRID));
             }
             if(tmp_maxX % DIST_PER_GRID != 0) {
                 if(tmp_maxX > 0)
-                    tmp_maxX = tmp_maxX - (tmp_maxX % DIST_PER_GRID);
+                    tmp_maxX = tmp_maxX + (DIST_PER_GRID - (tmp_maxX % DIST_PER_GRID));
                 else
-                    tmp_maxX = tmp_maxX - (DIST_PER_GRID - (tmp_maxX % DIST_PER_GRID));
+                    tmp_maxX = tmp_maxX + (tmp_maxX % (-1*DIST_PER_GRID));
             }
 
             //calculate dimensions in "in-game" units needed and add buffer on all sides
@@ -151,8 +151,8 @@ namespace FFTools {
             totalY = tmp_maxY - tmp_minY + 2*BUFFER_MULTIPLIER*DIST_PER_GRID;
 
             //# of grid square things
-            int graphWidth = (int) (totalX/DIST_PER_GRID);
-            int graphHeight = (int) (totalY/DIST_PER_GRID);
+            int graphWidth = (int) Math.Ceiling(totalX/DIST_PER_GRID);
+            int graphHeight = (int) Math.Ceiling(totalY/DIST_PER_GRID);
 
             //create new graph 
             GraphNode[][] newGraph = new GraphNode[graphWidth][];
@@ -357,8 +357,8 @@ namespace FFTools {
                         openNodes.addNew(NavGraph[adjacentX][adjacentY]);
                     }
                 }
-                this.Print();
-                Console.ReadLine();
+                //this.Print();
+                //Console.ReadLine();
             }
 
             //traceback to build path
