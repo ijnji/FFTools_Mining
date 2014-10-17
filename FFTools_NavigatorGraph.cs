@@ -185,6 +185,10 @@ namespace FFTools {
             this.minY = tmp_minY;
             this.maxX = tmp_maxX;
             this.maxY = tmp_maxY;
+            System.Console.WriteLine("minY: "+ this.minY + 
+                                     " | maxY: " + this.maxY + 
+                                     " | minX: " + this.minX + 
+                                     " | maxX: " + this.maxX);
         }
         //returns true/false if location exists 
         public bool findLocation (Location location) {

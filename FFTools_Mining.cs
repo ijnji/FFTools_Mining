@@ -25,12 +25,14 @@ namespace FFTools {
             List<IntPtr> gathNodeAddrList = theMemory.findAddressesOfBytes(gathTypeByteArray);
             List<GatheringNode> theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
             List<Location> gnlocl = new List<Location>();
+            gnlocl.Add(thePlayer.location);
             foreach (GatheringNode gn in theGathNodeList) gnlocl.Add(gn.location);
             theNavigatorGraph.addLocations(gnlocl);    
             // Start the UI thread.
             MapForm theMapForm = new MapForm();
             Thread formStartThread = new Thread(new ParameterizedThreadStart(formStart));
-            //formStartThread.Start(theMapForm);
+            formStartThread.Start(theMapForm);
+            theMapForm.setViewPlayer(thePlayer);
             theMapForm.setViewGathNodeList(theGathNodeList);
 
             System.Console.WriteLine("MAIN: Player is at " + thePlayer.location);
@@ -43,18 +45,19 @@ namespace FFTools {
             }
 
             // Begin main loop.
-//            while (true) {
-//                // Read one copy of each data from memory only.
-//                thePlayer = theMemory.readPlayer();
-//                theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
-//                // Update with new data.
-//                theMapForm.setViewPlayer(thePlayer);
-//                theMapForm.setViewGathNodeList(theGathNodeList);
-//                theNavigator.update(thePlayer);
-//
-//                // Update each 50ms.
-//                Thread.Sleep(50);
-//            }
+            theNavigator.moveThrough(path);
+            while (true) {
+                // Read one copy of each data from memory only.
+                thePlayer = theMemory.readPlayer();
+                theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
+                // Update with new data.
+                theMapForm.setViewPlayer(thePlayer);
+                theMapForm.setViewGathNodeList(theGathNodeList);
+                theNavigator.update(thePlayer);
+
+                // Update each 50ms.
+                Thread.Sleep(50);
+            }
 
             //GatheringNode gn = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
             //Queue<GatheringNode> gnHistory = new Queue<GatheringNode>();
