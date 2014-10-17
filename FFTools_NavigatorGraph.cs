@@ -124,25 +124,25 @@ namespace FFTools {
                 if(tmp_minY > 0) 
                     tmp_minY = tmp_minY - (tmp_minY % DIST_PER_GRID);
                 else
-                    tmp_minY = tmp_minY - (DIST_PER_GRID - (tmp_minY % (-1*DIST_PER_GRID)));
+                    tmp_minY = tmp_minY - (DIST_PER_GRID - Math.Abs(tmp_minY % DIST_PER_GRID));
             }
             if(tmp_maxY % DIST_PER_GRID != 0) {        
                 if(tmp_maxY > 0)
                     tmp_maxY = tmp_maxY + (DIST_PER_GRID - (tmp_maxY % DIST_PER_GRID));
                 else
-                    tmp_maxY = tmp_maxY + (tmp_maxY % (-1*DIST_PER_GRID));
+                    tmp_maxY = tmp_maxY + Math.Abs(tmp_maxY % DIST_PER_GRID);
             }
             if(tmp_minX % DIST_PER_GRID != 0) {
                 if(tmp_minX > 0)
                     tmp_minX = tmp_minX - (tmp_minX % DIST_PER_GRID);
                 else
-                    tmp_minX = tmp_minX - (DIST_PER_GRID - (tmp_minX % (-1*DIST_PER_GRID)));
+                    tmp_minX = tmp_minX - (DIST_PER_GRID - Math.Abs(tmp_minX % DIST_PER_GRID));
             }
             if(tmp_maxX % DIST_PER_GRID != 0) {
                 if(tmp_maxX > 0)
                     tmp_maxX = tmp_maxX + (DIST_PER_GRID - (tmp_maxX % DIST_PER_GRID));
                 else
-                    tmp_maxX = tmp_maxX + (tmp_maxX % (-1*DIST_PER_GRID));
+                    tmp_maxX = tmp_maxX + Math.Abs(tmp_maxX % DIST_PER_GRID);
             }
 
             //calculate dimensions in "in-game" units needed and add buffer on all sides
