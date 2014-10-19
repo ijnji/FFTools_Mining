@@ -13,7 +13,7 @@ namespace FFTools {
         private const Keys NAV_KEY_BACKWARD = Keys.S;
         private const Keys NAV_KEY_LEFT = Keys.A;
         private const Keys NAV_KEY_RIGHT = Keys.D;
-        private const float NAV_DIS_FROM_TARGET = (float)2.5;
+        public const float NAV_DIS_FROM_TARGET = (float)2.5;
         private const float NAV_REL_RAD_ALIGN_L1 = (float)0.1;
         private const float NAV_REL_RAD_ALIGN_L2 = (float)Math.PI / 4;
         // The MemoryManager is used for sending keypresses only.
@@ -22,6 +22,7 @@ namespace FFTools {
         private States CurrentState = States.STOPPED;
         private Location TargetLoc = null;
         private List<Location> TargetLocList = null;
+        private GatheringNode TargetGathNode = null;
         private bool KeyPressedForward = false;
         private bool KeyPressedBackward = false;
         private bool KeyPressedLeft = false;
@@ -34,15 +35,13 @@ namespace FFTools {
         // Note, positive findOrientationRelativeTo player means the target location
         // is left from player's POV, and negative means right from POV.
         public void update(Player thePlayer) {
-            if (TargetLoc == null) return;
+            if ( (TargetLoc == null) && (TargetGathNode == null) ) return;
             float disTarget = Location.findDistanceBetween(thePlayer.location, TargetLoc);
             float angTarget = thePlayer.findAngleBetween(TargetLoc);
             switch (CurrentState) {
                 case (States.STOPPED) :
                     if (disTarget <= NAV_DIS_FROM_TARGET) {
-                        if (VERBOSE) {
-                            System.Console.WriteLine("NAV: Target reached. " + TargetLoc);
-                        }
+                        System.Console.WriteLine("NAV: Target reached. " + TargetLoc);
                         readyNextTargetFromList();
                         if (TargetLoc != null) CurrentState = States.MOVING;
                         else {
@@ -62,9 +61,7 @@ namespace FFTools {
                     break;
                 case (States.MOVING) :
                     if (disTarget <= NAV_DIS_FROM_TARGET) {
-                        if (VERBOSE) {
-                            System.Console.WriteLine("NAV: Target reached. " + TargetLoc);
-                        }
+                        System.Console.WriteLine("NAV: Target reached. " + TargetLoc);
                         readyNextTargetFromList();
                         if (TargetLoc != null) CurrentState = States.MOVING;
                         else {
@@ -97,6 +94,26 @@ namespace FFTools {
                     TargetLoc = null;
                 }
             }
+        }
+        public void moveTo(Location loc) {
+            System.Console.WriteLine("NAV: Assigned loc " + loc);
+            TargetLoc = loc;
+            TargetLocList = null;
+        }
+        public void moveThrough(List<Location> locList) {
+            System.Console.WriteLine("NAV: Assigned loc list " + locList);
+            TargetLocList = locList;
+            readyNextTargetFromList();
+        }
+        public void gather(GatheringNode gn) {
+            System.Console.WriteLine("NAV: ASsigned gathnode " + gn);
+            TargetGathNode = gn;
+        }
+        public void stop() {
+            System.Console.WriteLine("NAV: Stopping");
+            TargetLoc = null;
+            TargetLocList = null;
+            CurrentState = States.STOPPED;
         }
         private void setKeyFB(bool forward, bool backward) {
             if (forward && !KeyPressedForward) {
@@ -133,13 +150,6 @@ namespace FFTools {
                 TheMemory.sendKeyUpMsg(NAV_KEY_RIGHT);
                 KeyPressedRight = false;
             }
-        }
-        public void moveTo(Location loc) {
-            TargetLoc = loc;
-        }
-        public void moveThrough(List<Location> locList) {
-            TargetLocList = locList;
-            readyNextTargetFromList();
         }
     } 
 }
