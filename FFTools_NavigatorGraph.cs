@@ -254,7 +254,7 @@ namespace FFTools {
         // The polygon specified must have at least 4 vertices.
         // The last vertice should match first vertice to complete the polygon perimeter.
         public void markObstaclePolygon(List<Location> vertices) {
-            if (vertices.Count < 3) {
+            if (vertices.Count < 4) {
                 System.Console.WriteLine("NAVGRAPH: Must give at least four vertices to mark a polygon obstacle.");
                 return;
             }
