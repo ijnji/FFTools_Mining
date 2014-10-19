@@ -251,11 +251,11 @@ namespace FFTools {
         }
 
         // Marks all nodes along edges of the given polygon as an obstacle for all directions.
-        // The polygon specified must have at least 3 vertices.
+        // The polygon specified must have at least 4 vertices.
         // The last vertice should match first vertice to complete the polygon perimeter.
         public void markObstaclePolygon(List<Location> vertices) {
             if (vertices.Count < 3) {
-                System.Console.WriteLine("NAVGRAPH: Must give at least three vertices to mark a polygon obstacle.");
+                System.Console.WriteLine("NAVGRAPH: Must give at least four vertices to mark a polygon obstacle.");
                 return;
             }
             for (int i = 0; i < vertices.Count - 1; i++) {
