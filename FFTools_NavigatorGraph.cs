@@ -64,7 +64,7 @@ namespace FFTools {
                 fromY = -1;
             }
             //GraphNode implements IComparable
-            public int CompareTo (Object obj) { //-1 inst precedes obj; 0 same; +1 inst follows obj
+            public int CompareTo(Object obj) { //-1 inst precedes obj; 0 same; +1 inst follows obj
                 if (obj == null) return -1;
 
                 GraphNode b = (GraphNode) obj;
@@ -89,7 +89,7 @@ namespace FFTools {
             }
         }
 
-        public void addLocations (List<Location> newLocations) {
+        public void addLocations(List<Location> newLocations) {
             List <Location> locations = new List <Location> ();
             foreach (Location location in newLocations) {
                 if (!this.findLocation(location))
@@ -190,8 +190,9 @@ namespace FFTools {
                                      " | minX: " + this.minX + 
                                      " | maxX: " + this.maxX);
         }
+
         //returns true/false if location exists 
-        public bool findLocation (Location location) {
+        public bool findLocation(Location location) {
             if (this.Size == 0) return false;
             if ((location.x >= this.minX) && (location.x <= this.maxX)
                     && (location.y >= this.minY) && (location.y <= this.maxY)){
@@ -199,8 +200,9 @@ namespace FFTools {
             }
             return false;
         }
+
         //overloaded findLocation to also write out X/Y indices into NavGraph array if found
-        public bool findLocation (Location location, out int outX, out int outY) {
+        public bool findLocation(Location location, out int outX, out int outY) {
             if (this.Size == 0) {
                 outX = -1;
                 outY = -1;
@@ -225,16 +227,73 @@ namespace FFTools {
             outY = -1;
             return false;
         }
-        //marks obstacle given location and direction of travel
-        public void markObstacle (Location location, Move direction) {
+
+        // Marks obstacle given location and all direction.
+        public void markObstacle(Location location) {
             int x, y;
-            if (this.findLocation(location, out x, out y))
-                this.NavGraph[x][y].canTravelFrom[(int) direction] = false;
-            else
-                System.Console.WriteLine("Obstacle unmarkable, does not exist in graph: " + location.ToString());
+            if (this.findLocation(location, out x, out y)) {
+                for (int i = 0; i < this.NavGraph[x][y].canTravelFrom.Length; i++) {
+                    this.NavGraph[x][y].canTravelFrom[i] = false;
+                }
+            } else {
+                System.Console.WriteLine("NAVGRAPH: Obstacle unmarkable, does not exist in graph: " + location.ToString());
+            }
         }
+
+        // Marks obstacle given location and direction of travel.
+        public void markObstacle(Location location, Move direction) {
+            int x, y;
+            if (this.findLocation(location, out x, out y)) {
+                this.NavGraph[x][y].canTravelFrom[(int) direction] = false;
+            } else {
+                System.Console.WriteLine("NAVGRAPH: Obstacle unmarkable, does not exist in graph: " + location.ToString());
+            }
+        }
+
+        // Marks all nodes along edges of the given polygon as an obstacle for all directions.
+        // The polygon specified must have at least 3 vertices.
+        // The last vertice should match first vertice to complete the polygon perimeter.
+        public void markObstaclePolygon(List<Location> vertices) {
+            if (vertices.Count < 3) {
+                System.Console.WriteLine("NAVGRAPH: Must give at least three vertices to mark a polygon obstacle.");
+                return;
+            }
+            for (int i = 0; i < vertices.Count - 1; i++) {
+                Location lb = vertices[i + 1];
+                Location la = vertices[i];
+                if (lb.x != la.x) {
+                    float slopeyx = (lb.y - la.y) / (lb.x - la.x);          
+                    if (lb.x > la.x) {
+                        for (float x = la.x; x <= lb.x; x += DIST_PER_GRID) {
+                            Location obs = new Location(x, (x - la.x) * slopeyx + la.y, (float)0);
+                            markObstacle(obs);
+                        }
+                    } else {
+                        for (float x = la.x; x >= lb.x; x -= DIST_PER_GRID) {
+                            Location obs = new Location(x, (x - la.x) * slopeyx + la.y, (float)0);
+                            markObstacle(obs);                            
+                        }
+                    }
+                }
+                if (lb.y != la.y) {
+                    float slopexy = (lb.x - la.x) / (lb.y - la.y);
+                    if (lb.y > la.y) {
+                        for (float y = la.y; y <= lb.y; y += DIST_PER_GRID) {
+                            Location obs = new Location((y - la.y) * slopexy + la.x, y, (float)0);
+                            markObstacle(obs);
+                        }
+                    } else {
+                        for (float y = la.y; y >= lb.y; y -= DIST_PER_GRID) {
+                            Location obs = new Location((y - la.y) * slopexy + la.x, y, (float)0);
+                            markObstacle(obs);
+                        }
+                    }
+                }
+            }
+        }
+
         //returns list of adjacent GraphNodes that can be reached from GraphNode at [x][y]
-        public List <int[]> findAdjacent (int x, int y) {
+        public List <int[]> findAdjacent(int x, int y) {
             List <int[]> adjacent = new List <int[]> ();
             //8 possibilities
             //North
@@ -287,14 +346,16 @@ namespace FFTools {
             }
             return adjacent;
         }
+
         //overloaded findAdjacent
-        public List <int[]> findAdjacent (GraphNode reference) {
+        public List <int[]> findAdjacent(GraphNode reference) {
             int x, y;
             findLocation(reference.location, out x, out y);
             return findAdjacent(x, y);
         }
+
         //A* do it.
-        public List <Location> findPath (Location start, Location end) {
+        public List <Location> findPath(Location start, Location end) {
             List <Location> path = new List <Location> ();
             PriorityQueue <GraphNode> openNodes = new PriorityQueue <GraphNode> ();
             //reset all scores to MaxValue, fromX/fromY to -1
