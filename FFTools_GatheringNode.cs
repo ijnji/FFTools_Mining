@@ -14,10 +14,7 @@ namespace FFTools {
             this.location = new Location(x, y, z);
         }
         public override string ToString() {
-            return "GathNode | " +
-                "vis: " + vis + " | " +
-                "mx: " + location.x + " | " +
-                "my: " + location.y;
+            return "[gathnode:" + vis + "," + this.location + "]";
         }
     }
 }

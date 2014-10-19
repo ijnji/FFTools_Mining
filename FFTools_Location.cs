@@ -23,9 +23,7 @@ namespace FFTools {
             this.z = z;
         }
         public override string ToString() {
-            return "X: " + x + " | " +
-                   "Y: " + y + " | " +
-                   "Z: " + z;
+            return "[loc:" + x + "," + y + "]";
         }
         public static float findDistanceBetween (Location A, Location B) {
             float dx = A.x - B.x;

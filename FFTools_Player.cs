@@ -15,10 +15,7 @@ namespace FFTools {
             this.location = new Location(x, y, z);
         }
         public override string ToString() {
-            return "P | " +
-                "px: " + location.x + "| " +
-                "py: " + location.y + "| " +
-                "prot: " + rot;
+            return "[player:" + this.location + "," + rot + "]";
         }
         // Orientation player should face to target location.
         public float findOrientationRelativeTo(Location tLocation) {
