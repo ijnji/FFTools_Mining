@@ -8,6 +8,10 @@ using System.Windows.Forms;
 
 namespace FFTools {
     public class Mining {
+        private enum States {IDLE, MOVING, MINING};
+        private static States CurrentState = States.IDLE;
+        private static GatheringNode TargetGathNode = null;
+
         public static void Main() {
             String gathType= "Mineral Deposit"; //set to desired farming type ex: Mineral Deposit, Mature Tree
             byte[] gathTypeByteArray = Encoding.ASCII.GetBytes(gathType);
@@ -24,10 +28,8 @@ namespace FFTools {
             //List<string> theGenDiagList = theMemory.readGeneralDialogueList();
             List<IntPtr> gathNodeAddrList = theMemory.findAddressesOfBytes(gathTypeByteArray);
             List<GatheringNode> theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
-            List<Location> gnlocl = new List<Location>();
-            gnlocl.Add(thePlayer.location);
-            foreach (GatheringNode gn in theGathNodeList) gnlocl.Add(gn.location);
-            theNavigatorGraph.addLocations(gnlocl);    
+ 
+
             // Start the UI thread.
             MapForm theMapForm = new MapForm();
             Thread formStartThread = new Thread(new ParameterizedThreadStart(formStart));
@@ -35,59 +37,51 @@ namespace FFTools {
             theMapForm.setViewPlayer(thePlayer);
             theMapForm.setViewGathNodeList(theGathNodeList);
 
-            System.Console.WriteLine("MAIN: Player is at " + thePlayer.location);
-            GatheringNode nearestGathNode = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
-            System.Console.WriteLine("MAIN: Nearest gathering node is at " + nearestGathNode.location);
-            List<Location> path = theNavigatorGraph.findPath(thePlayer.location, nearestGathNode.location);
-            System.Console.WriteLine("MAIN: The path to this node is: ");
-            foreach (Location l in path) {
-                System.Console.WriteLine(l);
-            }
-
             // Begin main loop.
-            theNavigator.moveThrough(path);
             while (true) {
                 // Read one copy of each data from memory only.
                 thePlayer = theMemory.readPlayer();
                 theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
-                // Update with new data.
+                
+                // Update every loop.
                 theMapForm.setViewPlayer(thePlayer);
                 theMapForm.setViewGathNodeList(theGathNodeList);
-                theNavigator.update(thePlayer);
+                
+                switch (CurrentState) {
+                    case (States.IDLE) :
+                        // Update the navgraph graph with current location in case we're at a completely new location.
+                        // NavGraph will ignore duplicate locations.
+                        List<Location> gnlocl = new List<Location>();
+                        gnlocl.Add(thePlayer.location);
+                        foreach (GatheringNode gn in theGathNodeList) gnlocl.Add(gn.location);
+                        theNavigatorGraph.addLocations(gnlocl);
+                        // Find path and begin navigation.
+                        TargetGathNode = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
+                        System.Console.WriteLine("MAIN: Nearest gathering node at " + TargetGathNode.location);
+                        List<Location> navPath = theNavigatorGraph.findPath(thePlayer.location, TargetGathNode.location);
+                        System.Console.WriteLine("MAIN: Beginning navigation");
+                        theNavigator.ctrlMoveThrough(navPath);
+                        CurrentState = States.MOVING;
+                        break;
+                    case (States.MOVING) :
+                        if (theNavigator.sensArrivedAtTarget()) {
+                            theNavigator.ctrlGatherFrom(TargetGathNode);
+                            CurrentState = States.MINING;
+                        }
+                        break;
+                    case (States.MINING) :
+                        if (theNavigator.sensMinedFromTarget()) {
+                            CurrentState = States.IDLE;
+                        }
+                        break;
+                }
+
+                // Navigator's update must be called consistently.
+                theNavigator.update(thePlayer, 50);
 
                 // Update each 50ms.
                 Thread.Sleep(50);
             }
-
-            //GatheringNode gn = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
-            //Queue<GatheringNode> gnHistory = new Queue<GatheringNode>();
-            //while (true) {
-            //    thePlayer = theMemory.readPlayer();
-            //    GathTypeAddresses = theMemory.findAddressesOfBytes(GathTypeByteArray);
-            //    theGathNodeList = theMemory.readGatheringNodeList(GathTypeAddresses);
-            //    System.Console.WriteLine("-------");
-            //    System.Console.WriteLine("Nearest mineral deposit is at...");
-            //    gn = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
-            //    System.Console.WriteLine(gn);
-            //    if( Location.findDistanceBetween(thePlayer.location, gn.location) < 250) { //TODO: fix 250 hack
-            //        System.Console.WriteLine("With a distance of " + Location.findDistanceBetween(thePlayer.location, gn.location));
-            //        System.Console.WriteLine("Need to face " + thePlayer.findOrientationRelativeTo(gn.location));
-            //        System.Console.WriteLine("Traveling to the node...");
-            //        travelTo(theMemory, gn.location);
-            //        gatherFrom(theMemory);
-            //        System.Console.WriteLine("Done with this node!");
-            //        if (gnHistory.Count > 10) gnHistory.Dequeue();
-            //        gnHistory.Enqueue(gn);
-            //    }
-            //    else {
-            //        System.Console.WriteLine("No nearby node, moving to previous good node and searching again");
-            //        gn = gnHistory.Dequeue();
-            //        System.Console.WriteLine("With a distance of " + Location.findDistanceBetween(thePlayer.location, gn.location));
-            //        System.Console.WriteLine("Need to face " + thePlayer.findOrientationRelativeTo(gn.location));
-            //        System.Console.WriteLine("Traveling to the node...");
-            //        travelTo(theMemory, gn.location);
-            //    }
-            //}
         }
 
         private static void formStart(Object theMapForm) {

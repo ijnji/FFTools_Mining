@@ -353,14 +353,14 @@ namespace FFTools {
                     NavGraph[x][y].fromY = -1;
                 }
             }
-            System.Console.WriteLine("done clearing cost and fromX/Y values");
+            //System.Console.WriteLine("done clearing cost and fromX/Y values");
             int startX, startY;
             int endX, endY;
             findLocation(start, out startX, out startY);
-            System.Console.WriteLine("startX/Y: " + startX + "," + startY);
+            //System.Console.WriteLine("startX/Y: " + startX + "," + startY);
             findLocation(end, out endX, out endY);
-            System.Console.WriteLine("endX/Y: " + endX + "," + endY);
-            System.Console.WriteLine("done finding start/end entries in NavGraph");
+            //System.Console.WriteLine("endX/Y: " + endX + "," + endY);
+            //System.Console.WriteLine("done finding start/end entries in NavGraph");
             NavGraph[startX][startY].costToNode = 0;
             //heuristic assumes direct travel (no obstacles) and is the "in-game" distance from middle of current GraphNode to middle of ending GraphNode
             NavGraph[startX][startY].costToTarget = Location.findDistanceBetween(NavGraph[startX][startY].location, NavGraph[endX][endY].location);
@@ -373,12 +373,12 @@ namespace FFTools {
             openNodes.addNew(NavGraph[startX][startY]);
             while (openNodes.Count > 0) {
                 GraphNode currentNode = openNodes.removeTop();
-                System.Console.WriteLine("Finding currentNode");
+                //System.Console.WriteLine("Finding currentNode");
                 findLocation(currentNode.location, out currentX, out currentY);
                 if ( (currentX == endX) && (currentY == endY) ) break;
                 List <int[]> adjacentList = this.findAdjacent(currentNode);
-                System.Console.WriteLine("Current node " + currentX + ", " + currentY);
-                System.Console.WriteLine("# valid adjacent: " + adjacentList.Count);
+                //System.Console.WriteLine("Current node " + currentX + ", " + currentY);
+                //System.Console.WriteLine("# valid adjacent: " + adjacentList.Count);
                 foreach (int[] adjacent in adjacentList) {
                     int adjacentX = adjacent[0];
                     int adjacentY = adjacent[1];
@@ -388,9 +388,9 @@ namespace FFTools {
                     // Heuristic if diagonals not allowed.
                     //int costToTarget = dx + dy;
                     float score = costToNode + costToTarget;
-                    System.Console.WriteLine("Node " + adjacent[0] + "," + adjacent[1] + " | Calculated Score: " + score + " | Current Score: " + NavGraph[adjacentX][adjacentY].Score);
+                    //System.Console.WriteLine("Node " + adjacent[0] + "," + adjacent[1] + " | Calculated Score: " + score + " | Current Score: " + NavGraph[adjacentX][adjacentY].Score);
                     if (score < NavGraph[adjacentX][adjacentY].Score) {
-                        System.Console.WriteLine("\tAdding " + adjacentX + "," + adjacentY);
+                        //System.Console.WriteLine("\tAdding " + adjacentX + "," + adjacentY);
                         NavGraph[adjacentX][adjacentY].costToTarget = costToTarget;
                         NavGraph[adjacentX][adjacentY].costToNode = costToNode;
                         NavGraph[adjacentX][adjacentY].fromX = currentX;
@@ -402,7 +402,7 @@ namespace FFTools {
                 //Console.ReadLine();
             }
             // Traceback to build path.
-            System.Console.WriteLine("Traceback to build path");
+            //System.Console.WriteLine("Traceback to build path");
             while ( !((currentX == startX) && (currentY == startY)) ) {
               path.Add(NavGraph[currentX][currentY].location);
               int tmpX = NavGraph[currentX][currentY].fromX;
