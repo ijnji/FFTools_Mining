@@ -55,6 +55,8 @@ namespace FFTools {
                         gnlocl.Add(thePlayer.location);
                         foreach (GatheringNode gn in theGathNodeList) gnlocl.Add(gn.location);
                         theNavigatorGraph.addLocations(gnlocl);
+                        // Mark obstacles manually for now.
+                        manualObstacleMark(theNavigatorGraph);
                         // Find path and begin navigation.
                         TargetGathNode = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
                         System.Console.WriteLine("MAIN: Nearest gathering node at " + TargetGathNode.location);
@@ -117,6 +119,19 @@ namespace FFTools {
                 }
             }
             return nearestGatheringNode;
+        }
+
+        private static void manualObstacleMark(NavigatorGraph theNavigatorGraph) {
+            // Lv10 Mineral Deposit Central Thanalan.
+            List<Location> ll = new List<Location>();
+            ll.Add(new Location(-68.9f, 20.0f));
+            ll.Add(new Location(-75.5f, 21.4f));
+            ll.Add(new Location(-79.45f, 16.4f));
+            ll.Add(new Location(-81.0f, 10.1f));
+            ll.Add(new Location(-71.5f, 11.2f));
+            ll.Add(new Location(-68.9f, 20.0f));
+
+            theNavigatorGraph.markObstaclePolygon(ll);
         }
     }
 }
