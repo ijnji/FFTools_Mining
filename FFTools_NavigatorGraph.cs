@@ -231,6 +231,25 @@ namespace FFTools {
             return false;
         }
 
+        // Returns list of locations in in-game coordinates that're marked as obstacles from all directions.
+        public List<Location> getObstacles() {
+            List<Location> obstacles = new List<Location>();
+            for (int x = 0; x < this.NavGraph.Length; x++) {
+                for (int y = 0; y < this.NavGraph[x].Length; y++) {
+                    bool blockedFromAllDirections = true;
+                    for (int i = 0; i < this.NavGraph[x][y].canTravelFrom.Length; i++) {
+                        if (this.NavGraph[x][y].canTravelFrom[i] == true) {
+                            blockedFromAllDirections = false;
+                        }
+                    }
+                    if (blockedFromAllDirections == true) {
+                        obstacles.Add(this.NavGraph[x][y].location);
+                    }
+                }
+            }
+            return obstacles;
+        }
+
         // Marks obstacle given location and all direction.
         public void markObstacle(Location location) {
             int x, y;
