@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace FFTools {
     public class Mining {
-        private enum States {IDLE, MOVING, MINING, DEBUG};
+        private enum States {IDLE, MOVING, MINING};
         private static States CurrentState = States.IDLE;
         private static GatheringNode TargetGathNode = null;
 
@@ -59,13 +59,12 @@ namespace FFTools {
                         List<Location> obstacles = theNavigatorGraph.getObstacles();
                         theMapForm.setViewGraphObstacles(obstacles);
                         // Find path and begin navigation.
-                        //TargetGathNode = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
-                        //System.Console.WriteLine("MAIN: Nearest gathering node at " + TargetGathNode.location);
-                        //List<Location> navPath = theNavigatorGraph.findPath(thePlayer.location, TargetGathNode.location);
-                        //System.Console.WriteLine("MAIN: Beginning navigation");
-                        //theNavigator.ctrlMoveThrough(navPath);
-                        //CurrentState = States.MOVING;
-                        CurrentState = States.DEBUG;
+                        TargetGathNode = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
+                        System.Console.WriteLine("MAIN: Nearest gathering node at " + TargetGathNode.location);
+                        List<Location> navPath = theNavigatorGraph.findPath(thePlayer.location, TargetGathNode.location);
+                        System.Console.WriteLine("MAIN: Beginning navigation");
+                        theNavigator.ctrlMoveThrough(navPath);
+                        CurrentState = States.MOVING;
                         break;
                     case (States.MOVING) :
                         if (theNavigator.sensArrivedAtTarget()) {
@@ -78,12 +77,10 @@ namespace FFTools {
                             CurrentState = States.IDLE;
                         }
                         break;
-                    case (States.DEBUG) :
-                        break;
                 }
 
                 // Navigator's update must be called consistently.
-                //theNavigator.update(thePlayer, 50);
+                theNavigator.update(thePlayer, 50);
 
                 // Update each 50ms.
                 Thread.Sleep(50);
@@ -128,7 +125,6 @@ namespace FFTools {
         private static void manualObstacleMark(NavigatorGraph theNavigatorGraph) {
             // Lv10 Mineral Deposit Central Thanalan.
             Location obs = new Location(-79.5f, 13.5f);
-            System.Console.WriteLine("DEBUG: Marking obstacle " + obs);
             theNavigatorGraph.markObstacle(obs);
         }
     }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace FFTools {
     public class NavigatorGraph {
         public enum Move {NtoS, StoN, EtoW, WtoE, NWtoSE, NEtoSW, SEtoNW, SWtoNE};
-        private const float DIST_PER_GRID = 5f;
+        private const float DIST_PER_GRID = 3f;
         // BUFFER_MULTIPLIER * DIST_PER_GRID is buffer space on edges of graph.
         private const int BUFFER_MULTIPLIER = 0;
         // Apparently jagged arrays [][] are faster than multidimensional [,]?

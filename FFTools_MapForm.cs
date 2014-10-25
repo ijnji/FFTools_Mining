@@ -16,7 +16,7 @@ namespace FFTools {
         private const int GRID_RIGHT_PADDING_IN_PIXELS = 45;
         private const int GRID_BOTTOM_PADDING_IN_PIXELS = 65;
         private const int GRID_SPACING_IN_EILMS = 3;
-        private const int GRID_PIXELS_PER_ILMS = 6;
+        private const int GRID_PIXELS_PER_ILMS = 5;
         // Grid color constants.
         private const int GRID_COLOR_LINES_R = 0x30;
         private const int GRID_COLOR_LINES_G = 0x30;
@@ -27,9 +27,9 @@ namespace FFTools {
         private const int GRID_COLOR_GATHNODE_INV_R = 0x00;
         private const int GRID_COLOR_GATHNODE_INV_G = 0x80;
         private const int GRID_COLOR_GATHNODE_INV_B = 0x80;
-        private const int GRID_COLOR_GRAPHOBS_R = 0x00;
-        private const int GRID_COLOR_GRAPHOBS_G = 0xFF;
-        private const int GRID_COLOR_GRAPHOBS_B = 0x00;
+        private const int GRID_COLOR_GRAPHOBS_R = 0x30;
+        private const int GRID_COLOR_GRAPHOBS_G = 0x30;
+        private const int GRID_COLOR_GRAPHOBS_B = 0x30;
 
         private System.Windows.Forms.Timer RefreshTimer;
         private IContainer Components;
@@ -99,11 +99,10 @@ namespace FFTools {
                 tmpViewPlayer = new Player(ViewPlayer.location, ViewPlayer.rot);
             }
 
-            paintGrid(gBmp);
             paintGraphObs(gBmp, tmpViewGraphObs);
             paintGatheringNodes(gBmp, tmpViewGathNodeList);
             paintPlayer(gBmp, tmpViewPlayer);
-            //paintText(gBmp);
+            paintGrid(gBmp);
 
             // Find top-left, bottom-right in aboslute ilms of mineral deposits.
             // Convert to absolute pixels for bitmap.
@@ -166,31 +165,13 @@ namespace FFTools {
                                                                      GRID_COLOR_GRAPHOBS_G,
                                                                      GRID_COLOR_GRAPHOBS_B));
             foreach (Location gol in tmpViewGraphObs) {
-                //System.Console.WriteLine(gol);
-                //gBmp.FillRectangle(graphobsBrush,
-                //    (int)Math.Round(gol.x * GRID_PIXELS_PER_ILMS + BITMAP_OFFSET_TO_ORIGIN),
-                //    (int)Math.Round(gol.y * GRID_PIXELS_PER_ILMS + BITMAP_OFFSET_TO_ORIGIN),
-                //    2,
-                //    2);
-                gBmp.FillEllipse(graphobsBrush,
-                    (int)Math.Round(gol.x * GRID_PIXELS_PER_ILMS + BITMAP_OFFSET_TO_ORIGIN - 1),
-                    (int)Math.Round(gol.y * GRID_PIXELS_PER_ILMS + BITMAP_OFFSET_TO_ORIGIN - 1),
-                    2, 2);
+                gBmp.FillRectangle(graphobsBrush,
+                    (int)Math.Round((gol.x - (float)GRID_SPACING_IN_EILMS / 2) * GRID_PIXELS_PER_ILMS + BITMAP_OFFSET_TO_ORIGIN),
+                    (int)Math.Round((gol.y - (float)GRID_SPACING_IN_EILMS / 2) * GRID_PIXELS_PER_ILMS + BITMAP_OFFSET_TO_ORIGIN),
+                    GRID_SPACING_IN_EILMS * GRID_PIXELS_PER_ILMS,
+                    GRID_SPACING_IN_EILMS * GRID_PIXELS_PER_ILMS);
             }
-
-            SolidBrush tBrush = new SolidBrush(Color.FromArgb(0xFF,
-                                                              0xFF,
-                                                              0xFF,
-                                                              0xFF));
-
-            gBmp.FillEllipse(tBrush,
-                    (int)Math.Round(-79.5f * GRID_PIXELS_PER_ILMS + BITMAP_OFFSET_TO_ORIGIN - 1),
-                    (int)Math.Round(13.5f * GRID_PIXELS_PER_ILMS + BITMAP_OFFSET_TO_ORIGIN - 1),
-                    2, 2);
-            //gBmp.FillEllipse(tBrush,
-            //        (int)Math.Round(-79.5f * GRID_PIXELS_PER_ILMS + BITMAP_OFFSET_TO_ORIGIN - 1),
-            //        (int)Math.Round(16.5f * GRID_PIXELS_PER_ILMS + BITMAP_OFFSET_TO_ORIGIN - 1),
-            //        2, 2);
+            graphobsBrush.Dispose();
         }
 
         private void paintGatheringNodes(Graphics gBmp, List<GatheringNode> tmpViewGathNodeList) {
