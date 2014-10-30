@@ -19,7 +19,7 @@ namespace FFTools {
 
         public const float NAV_DIS_FROM_TARGET = (float)1;
         private const float NAV_REL_RAD_ALIGN_L1 = (float)0.1;
-        private const float NAV_REL_RAD_ALIGN_L2 = (float)Math.PI / 4;
+        private const float NAV_REL_RAD_ALIGN_L2 = (float)Math.PI / 2;
         // The MemoryManager is used for sending keypresses only.
         private MemoryManager TheMemory = null;
         private enum States {STOPPED, MOVE_TO_LOC, ALIGN_TO_NODE, MINE_FROM_NODE};

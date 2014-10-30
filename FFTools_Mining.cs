@@ -54,15 +54,20 @@ namespace FFTools {
                         gnlocl.Add(thePlayer.location);
                         foreach (GatheringNode gn in theGathNodeList) gnlocl.Add(gn.location);
                         theNavigatorGraph.addLocations(gnlocl);
+
                         // Mark obstacles manually for now.
                         manualObstacleMark(theNavigatorGraph);
                         List<Location> obstacles = theNavigatorGraph.getObstacles();
                         theMapForm.setViewGraphObstacles(obstacles);
+
                         // Find path and begin navigation.
                         TargetGathNode = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
                         List<Location> path = theNavigatorGraph.findPath(thePlayer.location, TargetGathNode.location);
+                        // Remove last elements in path to make it slightly cleaner.
+                        path.RemoveAt(path.Count - 1);
                         theMapForm.setViewPath(path);
                         theNavigator.ctrlMoveThrough(path);
+
                         System.Console.WriteLine("MAIN: Nearest gathering node at " + TargetGathNode.location);
                         System.Console.WriteLine("MAIN: Beginning navigation");
                         CurrentState = States.MOVING;
