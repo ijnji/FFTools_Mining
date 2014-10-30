@@ -35,23 +35,31 @@ namespace FFTools {
         private IContainer Components;
         // Lock for all View objects.
         private Object MapFormLock = new Object();
+        private float ViewEilmMinX;
+        private float ViewEilmMinY;
         private List<GatheringNode> ViewGathNodeList;
         private List<Location> ViewGraphObs;
         private List<Location> ViewPath;
         private Player ViewPlayer;
 
-        public MapForm() {
+        private NavigatorGraph TheNavigatorGraph = null;
+
+        public MapForm(NavigatorGraph theNavigatorGraph) {
             InitializeComponent();
             this.SetStyle(ControlStyles.UserPaint, true);
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             this.SetStyle(ControlStyles.SupportsTransparentBackColor, true);
             this.Size = new Size(500, 500);
+            this.MouseDown += new MouseEventHandler(MapForm_MouseDown);
             //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            ViewEilmMinX = 0;
+            ViewEilmMinY = 0;
             ViewGathNodeList = new List<GatheringNode>();
             ViewGraphObs = new List<Location>();
             ViewPath = new List<Location>();
             ViewPlayer = new Player(0, 0, 0, 0);
+            TheNavigatorGraph = theNavigatorGraph;
         }
 
         public void InitializeComponent() {
@@ -73,6 +81,32 @@ namespace FFTools {
         protected override void OnLoad(EventArgs e) {
             base.OnLoad(e);
             RefreshTimer.Start();
+        }
+
+        private void MapForm_MouseDown(object sender, MouseEventArgs e) {
+            if (e.Button == MouseButtons.Right) {
+                float tmpViewEilmMinX = 0;
+                float tmpViewEilmMinY = 0;
+                lock (MapFormLock) {
+                    tmpViewEilmMinX = ViewEilmMinX;
+                    tmpViewEilmMinY = ViewEilmMinY;
+                }
+                float obsX = tmpViewEilmMinX + e.X / GRID_PIXELS_PER_ILMS;
+                float obsY = tmpViewEilmMinY + e.Y / GRID_PIXELS_PER_ILMS;
+                TheNavigatorGraph.toggleObstacle(new Location(obsX, obsY));
+            }
+            if (e.Button == MouseButtons.Left) {
+                float tmpViewEilmMinX = 0;
+                float tmpViewEilmMinY = 0;
+                lock (MapFormLock) {
+                    tmpViewEilmMinX = ViewEilmMinX;
+                    tmpViewEilmMinY = ViewEilmMinY;
+                }
+                float obsX = tmpViewEilmMinX + e.X / GRID_PIXELS_PER_ILMS;
+                float obsY = tmpViewEilmMinY + e.Y / GRID_PIXELS_PER_ILMS;
+                List<Location> path = TheNavigatorGraph.findPath(new Location(-10f, 130f), new Location(obsX, obsY));
+                this.setViewPath(path);
+            }
         }
 
         // Draw on a 1000px x 1000px bitmap in memory where the x-axis is at y=500px, and the y-axis is at x=500px.
@@ -144,6 +178,11 @@ namespace FFTools {
                                                 bitmaptoplefty - GRID_TOP_PADDING_IN_PIXELS,
                                                 bitmapwidth, bitmapheigh);
             gForm.DrawImage(bmp, desRect, srcRect, GraphicsUnit.Pixel);
+
+            lock (MapFormLock) {
+                ViewEilmMinX = topleftx - GRID_LEFT_PADDING_IN_PIXELS / GRID_PIXELS_PER_ILMS;
+                ViewEilmMinY = toplefty - GRID_TOP_PADDING_IN_PIXELS / GRID_PIXELS_PER_ILMS;
+            }
         }
 
         private void paintGrid(Graphics gBmp) {

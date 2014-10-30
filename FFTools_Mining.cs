@@ -17,25 +17,51 @@ namespace FFTools {
             byte[] gathTypeByteArray = Encoding.ASCII.GetBytes(gathType);
 
             // Ready singleton MemoryManager.
-            MemoryManager theMemory = new MemoryManager();
-            if (theMemory.initialize() > 0) Environment.Exit(1);
+            //UNCOMMENT MemoryManager theMemory = new MemoryManager();
+            //UNCOMMENT if (theMemory.initialize() > 0) Environment.Exit(1);
             // Ready singleton Navigator.
-            Navigator theNavigator = new Navigator(theMemory);
+            //UNCOMMENT Navigator theNavigator = new Navigator(theMemory);
             NavigatorGraph theNavigatorGraph = new NavigatorGraph();
 
             // Get a first read of all data.
-            Player thePlayer = theMemory.readPlayer();
+            //UNCOMMENT Player thePlayer = theMemory.readPlayer();
+            Player thePlayer = new Player(-10f, 0f, 130f, 0);//DELETEME
             //List<string> theGenDiagList = theMemory.readGeneralDialogueList();
-            List<IntPtr> gathNodeAddrList = theMemory.findAddressesOfBytes(gathTypeByteArray);
-            List<GatheringNode> theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
+            //UNCOMMENT List<IntPtr> gathNodeAddrList = theMemory.findAddressesOfBytes(gathTypeByteArray);
+            //UNCOMMENT List<GatheringNode> theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
+            List<GatheringNode> theGathNodeList = new List<GatheringNode>();//DELETEME
+            theGathNodeList.Add(new GatheringNode(false, -60f, 0f, 80f));//DELETEME
+            theGathNodeList.Add(new GatheringNode(false, 40f, 0f, 80f));//DELETEME
+            theGathNodeList.Add(new GatheringNode(false, 40f, 0f, 180f));//DELETEME
+            theGathNodeList.Add(new GatheringNode(false, -60f, 0f, 180f));//DELETEME
+            List<Location> gnlocl = new List<Location>();
+            gnlocl.Add(thePlayer.location);
+            foreach (GatheringNode gn in theGathNodeList) gnlocl.Add(gn.location);
+            theNavigatorGraph.addLocations(gnlocl);
+
+            theNavigatorGraph.markObstacle(new Location(-19f, 150f));
+            theNavigatorGraph.markObstacle(new Location(-16f, 150f));
+            theNavigatorGraph.markObstacle(new Location(-13f, 150f));
+            theNavigatorGraph.markObstacle(new Location(-10f, 150f));
+            theNavigatorGraph.markObstacle(new Location(-7f, 150f));
+            theNavigatorGraph.markObstacle(new Location(-4f, 150f));
+            theNavigatorGraph.markObstacle(new Location(-1f, 150f));
+            
 
             // Start the UI thread.
-            MapForm theMapForm = new MapForm();
+            MapForm theMapForm = new MapForm(theNavigatorGraph);
             Thread formStartThread = new Thread(new ParameterizedThreadStart(formStart));
             formStartThread.Start(theMapForm);
             theMapForm.setViewPlayer(thePlayer);
             theMapForm.setViewGathNodeList(theGathNodeList);
 
+            while (true) {
+                List<Location> obstacles = theNavigatorGraph.getObstacles();
+                theMapForm.setViewGraphObstacles(obstacles);
+                Thread.Sleep(59);
+            }
+
+            /*
             // Begin main loop.
             while (true) {
                 // Read one copy of each data from memory only.
@@ -91,6 +117,7 @@ namespace FFTools {
                 // Update each 50ms.
                 Thread.Sleep(50);
             }
+            */
         }
 
         private static void formStart(Object theMapForm) {

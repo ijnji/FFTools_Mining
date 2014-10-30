@@ -21,7 +21,9 @@ namespace FFTools {
 
         // Lock for NavGraph, MinX, MinY, MaxX, MaxY.
         private Object NavigatorGraphLock = new Object();
-        public GraphNode [][] NavGraph = new GraphNode[1][];
+        private GraphNode [][] NavGraph = new GraphNode[1][];
+        // Running list of graphnodes with all sides as obstacles.
+        private List<Location> ObstacleList = new List<Location>();
         private float MinX = float.PositiveInfinity;
         private float MinY = float.PositiveInfinity;
         private float MaxX = float.NegativeInfinity;
@@ -239,37 +241,74 @@ namespace FFTools {
             }
         }
 
-        // Returns list of locations in in-game coordinates that're marked as obstacles from all directions.
+        // Returns a copy of a list of locations in in-game coordinates that are marked as obstacles from all directions.
         public List<Location> getObstacles() {
             lock (NavigatorGraphLock) {
                 List<Location> obstacles = new List<Location>();
-                for (int x = 0; x < this.NavGraph.Length; x++) {
-                    for (int y = 0; y < this.NavGraph[x].Length; y++) {
-                        bool blockedFromAllDirections = true;
-                        for (int i = 0; i < this.NavGraph[x][y].canTravelFrom.Length; i++) {
-                            if (this.NavGraph[x][y].canTravelFrom[i] == true) {
-                                blockedFromAllDirections = false;
-                            }
-                        }
-                        if (blockedFromAllDirections == true) {
-                            obstacles.Add(this.NavGraph[x][y].location);
-                        }
-                    }
+                foreach (Location l in ObstacleList) {
+                    obstacles.Add(new Location(l.x, l.y));
                 }
                 return obstacles;
             }
         }
 
-        // Marks obstacle given location and all direction.
+        public void toggleObstacle(Location location) {
+            lock (NavigatorGraphLock) {
+                int x, y;
+                if ( this.findLocation(location, out x, out y) ) {
+                    Location copy = new Location(this.NavGraph[x][y].location.x, this.NavGraph[x][y].location.y);
+                    int index = ObstacleList.BinarySearch(copy);
+                    if (index < 0) {
+                        ObstacleList.Insert(~index, copy);
+                        for (int i = 0; i < this.NavGraph[x][y].canTravelFrom.Length; i++) {
+                            this.NavGraph[x][y].canTravelFrom[i] = false;
+                        }
+                    } else {
+                        ObstacleList.RemoveAt(index);
+                        for (int i = 0; i < this.NavGraph[x][y].canTravelFrom.Length; i++) {
+                            this.NavGraph[x][y].canTravelFrom[i] = true;
+                        }
+                    }
+                } else {
+                    System.Console.WriteLine("NAVGRAPH: Obstacle cannot be toggle-marked, does not exist in graph: " + location);
+                }
+            }
+        }
+
+        // Unmarks obstacle given location in all directions.
+        public void unmarkObstacle(Location location) {
+            lock (NavigatorGraphLock) {
+                int x, y;
+                if ( this.findLocation(location, out x, out y) ) {
+                    Location copy = new Location(this.NavGraph[x][y].location.x, this.NavGraph[x][y].location.y);
+                    int index = ObstacleList.BinarySearch(copy);
+                    if (index < 0) {
+                        ObstacleList.RemoveAt(~index);
+                        for (int i = 0; i < this.NavGraph[x][y].canTravelFrom.Length; i++) {
+                            this.NavGraph[x][y].canTravelFrom[i] = true;
+                        }
+                    }
+                } else {
+                    System.Console.WriteLine("NAVGRAPH: Obstacle cannot be unmarked, does not exist in graph: " + location);
+                }
+            }
+        }
+
+        // Marks obstacle given location in all direction.
         public void markObstacle(Location location) {
             lock (NavigatorGraphLock) {
                 int x, y;
                 if ( this.findLocation(location, out x, out y) ) {
-                    for (int i = 0; i < this.NavGraph[x][y].canTravelFrom.Length; i++) {
-                        this.NavGraph[x][y].canTravelFrom[i] = false;
+                    Location copy = new Location(this.NavGraph[x][y].location.x, this.NavGraph[x][y].location.y);
+                    int index = ObstacleList.BinarySearch(copy);
+                    if (index < 0) {
+                        ObstacleList.Insert(~index, copy);
+                        for (int i = 0; i < this.NavGraph[x][y].canTravelFrom.Length; i++) {
+                            this.NavGraph[x][y].canTravelFrom[i] = false;
+                        }
                     }
                 } else {
-                    System.Console.WriteLine("NAVGRAPH: Obstacle unmarkable, does not exist in graph: " + location.ToString());
+                    System.Console.WriteLine("NAVGRAPH: Obstacle cannot be marked, does not exist in graph: " + location);
                 }
             }
         }
@@ -281,7 +320,7 @@ namespace FFTools {
                 if ( this.findLocation(location, out x, out y) ) {
                     this.NavGraph[x][y].canTravelFrom[(int) direction] = false;
                 } else {
-                    System.Console.WriteLine("NAVGRAPH: Obstacle unmarkable, does not exist in graph: " + location.ToString());
+                    System.Console.WriteLine("NAVGRAPH: Obstacle cannot be marked, does not exist in graph: " + location);
                 }
             }
         }

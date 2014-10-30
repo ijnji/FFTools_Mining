@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 namespace FFTools {
-    public class Location {
+    public class Location : IComparable<Location> {
         //XYZ coordinates
         public float x;
         public float y;
@@ -26,6 +26,20 @@ namespace FFTools {
             this.x = x;
             this.y = y;
             this.z = z;
+        }
+        // Order priority is x, y, then z.
+        public int CompareTo(Location other) {
+            if (this.x < other.x) return -1;
+            else if (this.x > other.x) return 1;
+            else {
+                if (this.y < other.y) return -1;
+                else if (this.y > other.y) return 1;
+                else {
+                    if (this.z < other.z) return -1;
+                    else if (this.z > other.z) return 1;
+                    else return 0;
+                }
+            }
         }
         public override string ToString() {
             return "[loc:" + x + "," + y + "]";
