@@ -34,7 +34,7 @@ namespace FFTools {
         // Pointer walk offsets for address bases
         private int[] ADDR_PWALK_PLAYX = {0x103A2C0, 0x134, 0x4, 0xA0};
         //private int[] ADDR_PWALK_FISHBITE = {0xFF7BDC, 0x0, 0x3C, 0x2C};
-        private int[] ADDR_PWALK_GATHNODELIST = {0xF191C4, 0x30};
+        private int[] ADDR_PWALK_GATHNODELIST = {0x103A690, 0x184, 0x30};
         //private const int[] ADDR_PWALK_GENDIAG = {0xF20F70, 0x1C, 0x18, 0x42C, 0x0};
 
         // Address offsets from address bases.

@@ -36,6 +36,7 @@ namespace FFTools {
         private Object DataLock = new Object();
         private List<GatheringNode> ViewGathNodeList;
         private List<Location> ViewGraphObs;
+        private List<Location> ViewPath;
         private Player ViewPlayer;
 
         public MapForm() {
@@ -48,6 +49,7 @@ namespace FFTools {
             //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             ViewGathNodeList = new List<GatheringNode>();
             ViewGraphObs = new List<Location>();
+            ViewPath = new List<Location>();
             ViewPlayer = new Player(0, 0, 0, 0);
         }
 
@@ -84,6 +86,7 @@ namespace FFTools {
             // Grab a copy of semaphored view data.
             List<GatheringNode> tmpViewGathNodeList = new List<GatheringNode>();
             List<Location> tmpViewGraphObs = new List<Location>();
+            List<Location> tmpViewPath = new List<Location>();
             Player tmpViewPlayer;
             lock (DataLock) {
                 foreach (GatheringNode vgn in ViewGathNodeList) {
@@ -96,11 +99,17 @@ namespace FFTools {
                 }
             }
             lock (DataLock) {
+                foreach (Location pl in ViewPath) {
+                    tmpViewPath.Add(new Location(pl.x, pl.y));
+                }
+            }
+            lock (DataLock) {
                 tmpViewPlayer = new Player(ViewPlayer.location, ViewPlayer.rot);
             }
 
             paintGraphObs(gBmp, tmpViewGraphObs);
             paintGatheringNodes(gBmp, tmpViewGathNodeList);
+            paintPath(gBmp, tmpViewPath);
             paintPlayer(gBmp, tmpViewPlayer);
             paintGrid(gBmp);
 
@@ -198,6 +207,15 @@ namespace FFTools {
             }
         }
 
+        private void paintPath(Graphics gBmp, List<Location> tmpViewPath) {
+            foreach (Location pl in tmpViewPath) {
+                gBmp.FillEllipse(Brushes.Crimson,
+                    (int)Math.Round(pl.x * GRID_PIXELS_PER_ILMS + BITMAP_OFFSET_TO_ORIGIN - 1),
+                    (int)Math.Round(pl.y * GRID_PIXELS_PER_ILMS + BITMAP_OFFSET_TO_ORIGIN - 1),
+                    2, 2);
+            }
+        }
+
         private void paintPlayer(Graphics gBmp, Player tmpViewPlayer) {
             gBmp.FillEllipse(Brushes.Crimson,
                 (int)Math.Round(tmpViewPlayer.location.x * GRID_PIXELS_PER_ILMS + BITMAP_OFFSET_TO_ORIGIN - 3),
@@ -221,18 +239,27 @@ namespace FFTools {
             }
         }
 
-        public void setViewPlayer(Player newPlayer) {
-            lock (DataLock) {
-                ViewPlayer = new Player(newPlayer.location, newPlayer.rot);
-            }
-        }
-
         public void setViewGraphObstacles(List<Location> newObstacles) {
             lock (DataLock) {
                 ViewGraphObs.Clear();
                 foreach (Location gol in newObstacles) {
                     ViewGraphObs.Add(new Location(gol.x, gol.y));
                 }
+            }
+        }
+
+        public void setViewPath(List<Location> newPath) {
+            lock (DataLock) {
+                ViewPath.Clear();
+                foreach (Location pl in newPath) {
+                    ViewPath.Add(new Location(pl.x, pl.y));
+                }
+            }
+        }
+
+        public void setViewPlayer(Player newPlayer) {
+            lock (DataLock) {
+                ViewPlayer = new Player(newPlayer.location, newPlayer.rot);
             }
         }
     }

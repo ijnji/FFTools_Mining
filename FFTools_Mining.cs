@@ -60,10 +60,11 @@ namespace FFTools {
                         theMapForm.setViewGraphObstacles(obstacles);
                         // Find path and begin navigation.
                         TargetGathNode = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
+                        List<Location> path = theNavigatorGraph.findPath(thePlayer.location, TargetGathNode.location);
+                        theMapForm.setViewPath(path);
+                        theNavigator.ctrlMoveThrough(path);
                         System.Console.WriteLine("MAIN: Nearest gathering node at " + TargetGathNode.location);
-                        List<Location> navPath = theNavigatorGraph.findPath(thePlayer.location, TargetGathNode.location);
                         System.Console.WriteLine("MAIN: Beginning navigation");
-                        theNavigator.ctrlMoveThrough(navPath);
                         CurrentState = States.MOVING;
                         break;
                     case (States.MOVING) :
@@ -91,20 +92,6 @@ namespace FFTools {
             Application.Run((MapForm)theMapForm);
         }
 
-        private static void gatherFrom(MemoryManager theMemory) {
-            theMemory.sendKeyPressMsg(Keys.End, 100);
-            Thread.Sleep(2500);
-            theMemory.sendKeyPressMsg(Keys.Enter, 100);
-            Thread.Sleep(2500);
-            theMemory.sendKeyPressMsg(Keys.Enter, 100);
-            Thread.Sleep(2500);
-            for (int i = 0; i < 4; i++) {
-                theMemory.sendKeyPressMsg(Keys.Enter, 100);
-                Thread.Sleep(5000);
-            }
-            Thread.Sleep(3000);
-        }
-
         private static GatheringNode nearestVisibleGatheringNode(Player thePlayer, List<GatheringNode> theGathNodeList) {
             List<GatheringNode> visibleList = new List<GatheringNode>();
             foreach (GatheringNode gn in theGathNodeList) {
@@ -124,8 +111,8 @@ namespace FFTools {
 
         private static void manualObstacleMark(NavigatorGraph theNavigatorGraph) {
             // Lv10 Mineral Deposit Central Thanalan.
-            Location obs = new Location(-79.5f, 13.5f);
-            theNavigatorGraph.markObstacle(obs);
+            //Location obs = new Location(-79.5f, 13.5f);
+            //theNavigatorGraph.markObstacle(obs);
         }
     }
 }
