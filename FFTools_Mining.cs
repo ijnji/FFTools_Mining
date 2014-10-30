@@ -63,7 +63,7 @@ namespace FFTools {
                         // Find path and begin navigation.
                         TargetGathNode = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
                         List<Location> path = theNavigatorGraph.findPath(thePlayer.location, TargetGathNode.location);
-                        // Remove last elements in path to make it slightly cleaner.
+                        // Remove last elements in path to make navigation slightly cleaner.
                         path.RemoveAt(path.Count - 1);
                         theMapForm.setViewPath(path);
                         theNavigator.ctrlMoveThrough(path);

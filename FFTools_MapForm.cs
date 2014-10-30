@@ -33,7 +33,8 @@ namespace FFTools {
 
         private System.Windows.Forms.Timer RefreshTimer;
         private IContainer Components;
-        private Object DataLock = new Object();
+        // Lock for all View objects.
+        private Object MapFormLock = new Object();
         private List<GatheringNode> ViewGathNodeList;
         private List<Location> ViewGraphObs;
         private List<Location> ViewPath;
@@ -88,22 +89,22 @@ namespace FFTools {
             List<Location> tmpViewGraphObs = new List<Location>();
             List<Location> tmpViewPath = new List<Location>();
             Player tmpViewPlayer;
-            lock (DataLock) {
+            lock (MapFormLock) {
                 foreach (GatheringNode vgn in ViewGathNodeList) {
                     tmpViewGathNodeList.Add(new GatheringNode(vgn.vis, vgn.location));
                 }
             }
-            lock (DataLock) {
+            lock (MapFormLock) {
                 foreach (Location gol in ViewGraphObs) {
                     tmpViewGraphObs.Add(new Location(gol.x, gol.y));
                 }
             }
-            lock (DataLock) {
+            lock (MapFormLock) {
                 foreach (Location pl in ViewPath) {
                     tmpViewPath.Add(new Location(pl.x, pl.y));
                 }
             }
-            lock (DataLock) {
+            lock (MapFormLock) {
                 tmpViewPlayer = new Player(ViewPlayer.location, ViewPlayer.rot);
             }
 
@@ -231,7 +232,7 @@ namespace FFTools {
         }
 
         public void setViewGathNodeList(List<GatheringNode> newGathNodeList) {
-            lock (DataLock) {
+            lock (MapFormLock) {
                 ViewGathNodeList.Clear();
                 foreach (GatheringNode gn in newGathNodeList) {
                     ViewGathNodeList.Add(new GatheringNode(gn.vis, gn.location));
@@ -240,7 +241,7 @@ namespace FFTools {
         }
 
         public void setViewGraphObstacles(List<Location> newObstacles) {
-            lock (DataLock) {
+            lock (MapFormLock) {
                 ViewGraphObs.Clear();
                 foreach (Location gol in newObstacles) {
                     ViewGraphObs.Add(new Location(gol.x, gol.y));
@@ -249,7 +250,7 @@ namespace FFTools {
         }
 
         public void setViewPath(List<Location> newPath) {
-            lock (DataLock) {
+            lock (MapFormLock) {
                 ViewPath.Clear();
                 foreach (Location pl in newPath) {
                     ViewPath.Add(new Location(pl.x, pl.y));
@@ -258,7 +259,7 @@ namespace FFTools {
         }
 
         public void setViewPlayer(Player newPlayer) {
-            lock (DataLock) {
+            lock (MapFormLock) {
                 ViewPlayer = new Player(newPlayer.location, newPlayer.rot);
             }
         }
