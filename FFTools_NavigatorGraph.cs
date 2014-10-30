@@ -379,11 +379,11 @@ namespace FFTools {
                 }
                 // North West.
                 if ( ((x - 1) >= 0) && ((y + 1) < NavGraph[0].Length) ) { // Check within graph bounds.
-                    if (NavGraph[x - 1][y].canTravelFrom[(int)Move.SEtoNW]) adjacent.Add(new int[] {x - 1, y + 1});
+                    if (NavGraph[x - 1][y + 1].canTravelFrom[(int)Move.SEtoNW]) adjacent.Add(new int[] {x - 1, y + 1});
                 }
                 // North East.
                 if ( ((x + 1) < NavGraph.Length) && ((y + 1) < NavGraph[0].Length) ) { // Check within graph bounds.
-                    if (NavGraph[x - 1][y].canTravelFrom[(int)Move.SWtoNE]) adjacent.Add(new int[] {x + 1, y + 1});
+                    if (NavGraph[x + 1][y + 1].canTravelFrom[(int)Move.SWtoNE]) adjacent.Add(new int[] {x + 1, y + 1});
                 }
                 // East.
                 if ( (x + 1) < NavGraph.Length) { // Check within graph bounds.
@@ -395,11 +395,11 @@ namespace FFTools {
                 }
                 // South West.
                 if ( ((x - 1) >= 0) && ((y - 1) >= 0) ) { // Check within graph bounds.
-                    if (NavGraph[x - 1][y].canTravelFrom[(int)Move.NEtoSW]) adjacent.Add(new int[] {x - 1, y - 1});
+                    if (NavGraph[x - 1][y - 1].canTravelFrom[(int)Move.NEtoSW]) adjacent.Add(new int[] {x - 1, y - 1});
                 }
                 // South East.
                 if ( ((x + 1) < NavGraph.Length) && ((y - 1) >= 0) ) { // Check within graph bounds.
-                    if (NavGraph[x - 1][y].canTravelFrom[(int)Move.NWtoSE]) adjacent.Add(new int[] {x + 1, y - 1});
+                    if (NavGraph[x + 1][y - 1].canTravelFrom[(int)Move.NWtoSE]) adjacent.Add(new int[] {x + 1, y - 1});
                 }
                 // West.
                 if ( (x - 1) >= 0 ) { // Check within graph bounds.
