@@ -11,12 +11,13 @@ namespace FFTools {
         private const int BITMAP_SIZE_IN_PIXELS = 2000;
         private const int BITMAP_OFFSET_TO_ORIGIN = BITMAP_SIZE_IN_PIXELS / 2;
         // Grid appearance constants.
-        private const int GRID_TOP_PADDING_IN_PIXELS = 20;
+        private const int GRID_TOP_PADDING_IN_PIXELS = 40;
         private const int GRID_LEFT_PADDING_IN_PIXELS = 20;
         private const int GRID_RIGHT_PADDING_IN_PIXELS = 45;
         private const int GRID_BOTTOM_PADDING_IN_PIXELS = 65;
         private const int GRID_SPACING_IN_EILMS = 3;
         private const int GRID_PIXELS_PER_ILMS = 5;
+        private const int GRID_INTERFACE_HEIGHT = 20;
         // Grid color constants.
         private const int GRID_COLOR_LINES_R = 0x30;
         private const int GRID_COLOR_LINES_G = 0x30;
@@ -84,28 +85,34 @@ namespace FFTools {
         }
 
         private void MapForm_MouseDown(object sender, MouseEventArgs e) {
-            if (e.Button == MouseButtons.Right) {
-                float tmpViewEilmMinX = 0;
-                float tmpViewEilmMinY = 0;
-                lock (MapFormLock) {
-                    tmpViewEilmMinX = ViewEilmMinX;
-                    tmpViewEilmMinY = ViewEilmMinY;
+            if (e.Y < GRID_INTERFACE_HEIGHT) {
+                // Interface click.
+            } else if ( ((e.X > GRID_LEFT_PADDING_IN_PIXELS) && (e.X < (this.Width - GRID_RIGHT_PADDING_IN_PIXELS))) &&
+                        ((e.Y > GRID_TOP_PADDING_IN_PIXELS) && (e.Y < (this.Height - GRID_BOTTOM_PADDING_IN_PIXELS))) ) {
+                // Graph click.
+                if (e.Button == MouseButtons.Right) {
+                    float tmpViewEilmMinX = 0;
+                    float tmpViewEilmMinY = 0;
+                    lock (MapFormLock) {
+                        tmpViewEilmMinX = ViewEilmMinX;
+                        tmpViewEilmMinY = ViewEilmMinY;
+                    }
+                    float obsX = tmpViewEilmMinX + e.X / GRID_PIXELS_PER_ILMS;
+                    float obsY = tmpViewEilmMinY + e.Y / GRID_PIXELS_PER_ILMS;
+                    TheNavigatorGraph.toggleObstacle(new Location(obsX, obsY));
                 }
-                float obsX = tmpViewEilmMinX + e.X / GRID_PIXELS_PER_ILMS;
-                float obsY = tmpViewEilmMinY + e.Y / GRID_PIXELS_PER_ILMS;
-                TheNavigatorGraph.toggleObstacle(new Location(obsX, obsY));
-            }
-            if (e.Button == MouseButtons.Left) {
-                float tmpViewEilmMinX = 0;
-                float tmpViewEilmMinY = 0;
-                lock (MapFormLock) {
-                    tmpViewEilmMinX = ViewEilmMinX;
-                    tmpViewEilmMinY = ViewEilmMinY;
+                if (e.Button == MouseButtons.Left) {
+                    float tmpViewEilmMinX = 0;
+                    float tmpViewEilmMinY = 0;
+                    lock (MapFormLock) {
+                        tmpViewEilmMinX = ViewEilmMinX;
+                        tmpViewEilmMinY = ViewEilmMinY;
+                    }
+                    float obsX = tmpViewEilmMinX + e.X / GRID_PIXELS_PER_ILMS;
+                    float obsY = tmpViewEilmMinY + e.Y / GRID_PIXELS_PER_ILMS;
+                    List<Location> path = TheNavigatorGraph.findPath(new Location(-10f, 130f), new Location(obsX, obsY));
+                    this.setViewPath(path);
                 }
-                float obsX = tmpViewEilmMinX + e.X / GRID_PIXELS_PER_ILMS;
-                float obsY = tmpViewEilmMinY + e.Y / GRID_PIXELS_PER_ILMS;
-                List<Location> path = TheNavigatorGraph.findPath(new Location(-10f, 130f), new Location(obsX, obsY));
-                this.setViewPath(path);
             }
         }
 
@@ -143,10 +150,10 @@ namespace FFTools {
             }
 
             paintGraphObs(gBmp, tmpViewGraphObs);
-            paintGatheringNodes(gBmp, tmpViewGathNodeList);
-            paintPath(gBmp, tmpViewPath);
-            paintPlayer(gBmp, tmpViewPlayer);
             paintGrid(gBmp);
+            paintPath(gBmp, tmpViewPath);
+            paintGatheringNodes(gBmp, tmpViewGathNodeList);
+            paintPlayer(gBmp, tmpViewPlayer);
 
             // Find top-left, bottom-right in aboslute ilms of mineral deposits.
             // Convert to absolute pixels for bitmap.
@@ -177,7 +184,10 @@ namespace FFTools {
             RectangleF srcRect = new RectangleF(bitmaptopleftx - GRID_LEFT_PADDING_IN_PIXELS,
                                                 bitmaptoplefty - GRID_TOP_PADDING_IN_PIXELS,
                                                 bitmapwidth, bitmapheigh);
+            
             gForm.DrawImage(bmp, desRect, srcRect, GraphicsUnit.Pixel);
+
+            paintInterface(gForm);
 
             lock (MapFormLock) {
                 ViewEilmMinX = topleftx - GRID_LEFT_PADDING_IN_PIXELS / GRID_PIXELS_PER_ILMS;
@@ -261,6 +271,10 @@ namespace FFTools {
                 (int)Math.Round(tmpViewPlayer.location.x * GRID_PIXELS_PER_ILMS + BITMAP_OFFSET_TO_ORIGIN - 3),
                 (int)Math.Round(tmpViewPlayer.location.y * GRID_PIXELS_PER_ILMS + BITMAP_OFFSET_TO_ORIGIN - 3),
                 6, 6);
+        }
+
+        private void paintInterface(Graphics gForm) {
+            gForm.FillRectangle(Brushes.White, 0, 0, this.Width, GRID_INTERFACE_HEIGHT);
         }
 
         private void paintText(Graphics gBmp) {
