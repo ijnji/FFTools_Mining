@@ -1,5 +1,8 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
 namespace FFTools {
     public class NavigatorGraph {
         public enum Move {NtoS, StoN, EtoW, WtoE, NWtoSE, NEtoSW, SEtoNW, SWtoNE};
@@ -367,6 +370,42 @@ namespace FFTools {
                     }
                 }
             }
+        }
+
+        // Saves obstacle list to file. Filename static for now.
+        // ASCII format: "<X Location> <Y Location>"
+        // New line for each obstacle.
+        public void saveObstacles() {
+            string filename = "obstacles.save";
+            TextWriter tw = new StreamWriter(filename);
+            lock (NavigatorGraphLock) {
+                foreach (Location ol in ObstacleList) {
+                    tw.WriteLine(ol.x + " " + ol.y);
+                }
+            }
+            tw.Close();
+            System.Console.WriteLine("NAVGRAPH: Obstacles saved.");
+        }
+
+        // Loads obstacle list from file. Filename static for now.
+        // ASCII format: "<X Location> <Y Location>"
+        // New line for each obstacle.
+        public void loadObstacles() {
+            string filename = "obstacles.save";
+            TextReader tr = new StreamReader(filename);
+            string line = "";
+            lock (NavigatorGraphLock) {
+                while ((line = tr.ReadLine()) != null) {
+                    if (line != "") {
+                        string[] linesplit = Regex.Split(line, @"\s+");
+                        float x = Convert.ToSingle(linesplit[0]);
+                        float y = Convert.ToSingle(linesplit[1]);
+                        this.markObstacle(new Location(x, y));
+                    }
+                }
+            }
+            tr.Close();
+            System.Console.WriteLine("NAVGRAPH: Obstacles loaded.");
         }
 
         // Returns list of adjacent GraphNodes that can be reached from GraphNode at [x][y].

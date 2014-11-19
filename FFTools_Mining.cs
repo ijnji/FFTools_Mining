@@ -17,36 +17,25 @@ namespace FFTools {
             byte[] gathTypeByteArray = Encoding.ASCII.GetBytes(gathType);
 
             // Ready singleton MemoryManager.
-            //UNCOMMENT MemoryManager theMemory = new MemoryManager();
-            //UNCOMMENT if (theMemory.initialize() > 0) Environment.Exit(1);
+            MemoryManager theMemory = new MemoryManager();
+            if (theMemory.initialize() > 0) Environment.Exit(1);
             // Ready singleton Navigator.
-            //UNCOMMENT Navigator theNavigator = new Navigator(theMemory);
+            Navigator theNavigator = new Navigator(theMemory);
             NavigatorGraph theNavigatorGraph = new NavigatorGraph();
 
             // Get a first read of all data.
-            //UNCOMMENT Player thePlayer = theMemory.readPlayer();
-            Player thePlayer = new Player(-10f, 0f, 130f, 0);//DELETEME
+            Player thePlayer = theMemory.readPlayer();
+            //Player thePlayer = new Player(-10f, 0f, 130f, 0);//DELETEME
             //List<string> theGenDiagList = theMemory.readGeneralDialogueList();
-            //UNCOMMENT List<IntPtr> gathNodeAddrList = theMemory.findAddressesOfBytes(gathTypeByteArray);
-            //UNCOMMENT List<GatheringNode> theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
-            List<GatheringNode> theGathNodeList = new List<GatheringNode>();//DELETEME
-            theGathNodeList.Add(new GatheringNode(false, -60f, 0f, 80f));//DELETEME
-            theGathNodeList.Add(new GatheringNode(false, 40f, 0f, 80f));//DELETEME
-            theGathNodeList.Add(new GatheringNode(false, 40f, 0f, 180f));//DELETEME
-            theGathNodeList.Add(new GatheringNode(false, -60f, 0f, 180f));//DELETEME
+            List<IntPtr> gathNodeAddrList = theMemory.findAddressesOfBytes(gathTypeByteArray);
+            List<GatheringNode> theGathNodeList = theMemory.readGatheringNodeList(gathNodeAddrList);
+
+            // Initialize the navigatorgraph and load default save.
             List<Location> gnlocl = new List<Location>();
             gnlocl.Add(thePlayer.location);
             foreach (GatheringNode gn in theGathNodeList) gnlocl.Add(gn.location);
             theNavigatorGraph.addLocations(gnlocl);
-
-            theNavigatorGraph.markObstacle(new Location(-19f, 150f));
-            theNavigatorGraph.markObstacle(new Location(-16f, 150f));
-            theNavigatorGraph.markObstacle(new Location(-13f, 150f));
-            theNavigatorGraph.markObstacle(new Location(-10f, 150f));
-            theNavigatorGraph.markObstacle(new Location(-7f, 150f));
-            theNavigatorGraph.markObstacle(new Location(-4f, 150f));
-            theNavigatorGraph.markObstacle(new Location(-1f, 150f));
-            
+            theNavigatorGraph.loadObstacles();
 
             // Start the UI thread.
             MapForm theMapForm = new MapForm(theNavigatorGraph);
@@ -55,13 +44,7 @@ namespace FFTools {
             theMapForm.setViewPlayer(thePlayer);
             theMapForm.setViewGathNodeList(theGathNodeList);
 
-            while (true) {
-                List<Location> obstacles = theNavigatorGraph.getObstacles();
-                theMapForm.setViewGraphObstacles(obstacles);
-                Thread.Sleep(59);
-            }
 
-            /*
             // Begin main loop.
             while (true) {
                 // Read one copy of each data from memory only.
@@ -76,7 +59,7 @@ namespace FFTools {
                     case (States.IDLE) :
                         // Update the navgraph graph with current location in case we're at a completely new location.
                         // NavGraph will ignore duplicate locations.
-                        List<Location> gnlocl = new List<Location>();
+                        gnlocl = new List<Location>();
                         gnlocl.Add(thePlayer.location);
                         foreach (GatheringNode gn in theGathNodeList) gnlocl.Add(gn.location);
                         theNavigatorGraph.addLocations(gnlocl);
@@ -90,7 +73,7 @@ namespace FFTools {
                         TargetGathNode = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
                         List<Location> path = theNavigatorGraph.findPath(thePlayer.location, TargetGathNode.location);
                         // Remove last elements in path to make navigation slightly cleaner.
-                        path.RemoveAt(path.Count - 1);
+                        if (path.Count > 0) path.RemoveAt(path.Count - 1);
                         theMapForm.setViewPath(path);
                         theNavigator.ctrlMoveThrough(path);
 
@@ -112,12 +95,11 @@ namespace FFTools {
                 }
 
                 // Navigator's update must be called consistently.
-                theNavigator.update(thePlayer, 50);
+                theNavigator.update(thePlayer, 25);
 
-                // Update each 50ms.
-                Thread.Sleep(50);
+                // Update each 25ms.
+                Thread.Sleep(25);
             }
-            */
         }
 
         private static void formStart(Object theMapForm) {

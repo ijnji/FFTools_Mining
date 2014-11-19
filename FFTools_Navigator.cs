@@ -17,9 +17,9 @@ namespace FFTools {
         private const Keys NAV_KEY_FACE_TARGET = Keys.NumPad9;
         private const Keys NAV_KEY_OPEN_NODE = Keys.NumPad1;
 
-        public const float NAV_DIS_FROM_TARGET = (float)1;
+        public const float NAV_DIS_FROM_TARGET = (float)2;
         private const float NAV_REL_RAD_ALIGN_L1 = (float)0.1;
-        private const float NAV_REL_RAD_ALIGN_L2 = (float)Math.PI / 2;
+        private const float NAV_REL_RAD_ALIGN_L2 = (float)Math.PI / 3;
         // The MemoryManager is used for sending keypresses only.
         private MemoryManager TheMemory = null;
         private enum States {STOPPED, MOVE_TO_LOC, ALIGN_TO_NODE, MINE_FROM_NODE};

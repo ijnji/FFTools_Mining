@@ -93,7 +93,7 @@ namespace FFTools {
             System.Console.WriteLine("---");
             System.Console.WriteLine("Pointer walking for the player x location address...");
             AddrPlayerX = pointerWalk(ProcAddrBase, ADDR_PWALK_PLAYX);
-            System.Console.WriteLine("Setting fish bite status address as 0x" + AddrPlayerX.ToString("X8"));
+            System.Console.WriteLine("Setting player X location address as 0x" + AddrPlayerX.ToString("X8"));
 
             System.Console.WriteLine("---");
             //System.Console.WriteLine("Pointer walking for the general dialog box address...");
@@ -108,8 +108,9 @@ namespace FFTools {
             System.Console.WriteLine("Skipping the fish bite status address for now...");
 
             System.Console.WriteLine("---");
-            System.Console.WriteLine("Pointer walking for the gathering node list address...");
-            AddrGathNodeList = pointerWalk(ProcAddrBase, ADDR_PWALK_GATHNODELIST);
+            //System.Console.WriteLine("Pointer walking for the gathering node list address...");
+            //AddrGathNodeList = pointerWalk(ProcAddrBase, ADDR_PWALK_GATHNODELIST);
+            AddrGathNodeList = (IntPtr)0x1376B790;
             System.Console.WriteLine("Setting gathering node list address as 0x" + AddrGathNodeList.ToString("X8"));
          
             System.Console.WriteLine("---");
