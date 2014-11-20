@@ -9,7 +9,7 @@ using System.Windows.Forms;
 namespace FFTools {
     public class MapForm : Form {
         // Unit conversion constants.
-        private const int BITMAP_SIZE_IN_PIXELS = 2000;
+        private const int BITMAP_SIZE_IN_PIXELS = 4000;
         private const int BITMAP_OFFSET_TO_ORIGIN = BITMAP_SIZE_IN_PIXELS / 2;
 
         // Grid appearance constants.
@@ -49,8 +49,9 @@ namespace FFTools {
 
         // This UI class needs access to the pathing logic for obstacle info.
         private NavigatorGraph TheNavigatorGraph = null;
+        private Navigator TheNavigator = null; 
 
-        public MapForm(NavigatorGraph theNavigatorGraph) {
+        public MapForm(NavigatorGraph theNavigatorGraph, Navigator theNavigator) {
             InitializeComponent();
             this.SetStyle(ControlStyles.UserPaint, true);
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
@@ -66,6 +67,7 @@ namespace FFTools {
             ViewPath = new List<Location>();
             ViewPlayer = new Player(0, 0, 0, 0);
             TheNavigatorGraph = theNavigatorGraph;
+            TheNavigator = theNavigator;
         }
 
         public void InitializeComponent() {
@@ -100,11 +102,15 @@ namespace FFTools {
                     TheNavigatorGraph.loadObstacles();
                     this.setViewGraphObstacles(TheNavigatorGraph.getObstacles());
                 } else if ( (e.X > 220) && (e.X < 300) && (e.Y > 20) && (e.Y < 50) ) {
+                    // Unpause
+                    TheNavigator.navEnableToggle();
+                } else if ( (e.X > 320) && (e.X < 400) && (e.Y > 20) && (e.Y < 50) ) {
                     // Exit
                     Environment.Exit(0);
                 }
-            } else if ( (e.X > GRID_LEFT_PADDING_IN_PIXELS) && (e.X < (this.Width - GRID_RIGHT_PADDING_IN_PIXELS)) &&
-                        (e.Y > GRID_TOP_PADDING_IN_PIXELS) && (e.Y < (this.Height - GRID_BOTTOM_PADDING_IN_PIXELS)) ) {
+            //} else if ( (e.X > GRID_LEFT_PADDING_IN_PIXELS) && (e.X < (this.Width - GRID_RIGHT_PADDING_IN_PIXELS)) &&
+            //            (e.Y > GRID_TOP_PADDING_IN_PIXELS) && (e.Y < (this.Height - GRID_BOTTOM_PADDING_IN_PIXELS)) ) {
+            } else {
                 // Graph click.
                 if (e.Button == MouseButtons.Right) {
                     float tmpViewEilmMinX = 0;
@@ -303,10 +309,15 @@ namespace FFTools {
             gForm.DrawRectangle(linePen, new Rectangle(120, 20, GRID_BUTTON_WIDTH, GRID_BUTTON_HEIGHT));
             gForm.DrawString("Load", lineFont, Brushes.White, 120 + 19, 22 + GRID_BUTTON_TXT_OFF_Y, new StringFormat());     
 
-            // Exit Button
+            // Un/pause Button
             gForm.FillRectangle(Brushes.Black, 220, 20, GRID_BUTTON_WIDTH, GRID_BUTTON_HEIGHT);
             gForm.DrawRectangle(linePen, new Rectangle(220, 20, GRID_BUTTON_WIDTH, GRID_BUTTON_HEIGHT));
-            gForm.DrawString("Exit", lineFont, Brushes.White, 220 + 22, 22 + GRID_BUTTON_TXT_OFF_Y, new StringFormat());       
+            gForm.DrawString("Un/pause", lineFont, Brushes.White, 220 + 1, 22 + GRID_BUTTON_TXT_OFF_Y, new StringFormat());   
+
+            // Exit Button
+            gForm.FillRectangle(Brushes.Black, 320, 20, GRID_BUTTON_WIDTH, GRID_BUTTON_HEIGHT);
+            gForm.DrawRectangle(linePen, new Rectangle(320, 20, GRID_BUTTON_WIDTH, GRID_BUTTON_HEIGHT));
+            gForm.DrawString("Exit", lineFont, Brushes.White, 320 + 22, 22 + GRID_BUTTON_TXT_OFF_Y, new StringFormat());       
 
             linePen.Dispose();
             lineFont.Dispose();

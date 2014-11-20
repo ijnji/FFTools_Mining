@@ -52,7 +52,7 @@ namespace FFTools {
         private int FISHBITE_BITE = 0x1;
         private const int GATHNODE_VIS = 0x0;
         private const int GATHNODE_INVIS = 0x80;
-        private const int GATHNODELIST_LENGTH = 0x3500;
+        private const int GATHNODELIST_LENGTH = 0x5000;
 
         // Address bases.
         private Process Proc = null;
@@ -110,7 +110,7 @@ namespace FFTools {
             System.Console.WriteLine("---");
             //System.Console.WriteLine("Pointer walking for the gathering node list address...");
             //AddrGathNodeList = pointerWalk(ProcAddrBase, ADDR_PWALK_GATHNODELIST);
-            AddrGathNodeList = (IntPtr)0x1376B790;
+            AddrGathNodeList = (IntPtr)0x1303D020;
             System.Console.WriteLine("Setting gathering node list address as 0x" + AddrGathNodeList.ToString("X8"));
          
             System.Console.WriteLine("---");

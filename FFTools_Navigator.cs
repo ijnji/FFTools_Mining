@@ -24,6 +24,7 @@ namespace FFTools {
         private MemoryManager TheMemory = null;
         private enum States {STOPPED, MOVE_TO_LOC, ALIGN_TO_NODE, MINE_FROM_NODE};
         private States CurrentState = States.STOPPED;
+        private bool NavEnable = false;
         private int Timer = 0;
         private int Command = 0;
         private Location TargetLoc = null;
@@ -41,6 +42,7 @@ namespace FFTools {
         // Note, positive findOrientationRelativeTo player means the target location
         // is left from player's POV, and negative means right from POV.
         public void update(Player thePlayer, int timeElapsed) {
+            if ( NavEnable == false ) return;
             if ( (TargetLoc == null) && (TargetGathNode == null) ) return;
             Timer += timeElapsed;
             float disTarget = (TargetLoc != null) ? Location.findDistanceBetween(thePlayer.location, TargetLoc) : 0;
@@ -287,6 +289,10 @@ namespace FFTools {
                 TheMemory.sendKeyUpMsg(NAV_KEY_RIGHT);
                 KeyPressedRight = false;
             }
+        }
+        public void navEnableToggle() {
+            if (NavEnable) NavEnable = false;
+            else NavEnable = true;
         }
     } 
 }

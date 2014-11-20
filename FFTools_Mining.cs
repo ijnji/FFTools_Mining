@@ -35,10 +35,10 @@ namespace FFTools {
             gnlocl.Add(thePlayer.location);
             foreach (GatheringNode gn in theGathNodeList) gnlocl.Add(gn.location);
             theNavigatorGraph.addLocations(gnlocl);
-            theNavigatorGraph.loadObstacles();
+            //theNavigatorGraph.loadObstacles();
 
             // Start the UI thread.
-            MapForm theMapForm = new MapForm(theNavigatorGraph);
+            MapForm theMapForm = new MapForm(theNavigatorGraph, theNavigator);
             Thread formStartThread = new Thread(new ParameterizedThreadStart(formStart));
             formStartThread.Start(theMapForm);
             theMapForm.setViewPlayer(thePlayer);
@@ -64,14 +64,13 @@ namespace FFTools {
                         foreach (GatheringNode gn in theGathNodeList) gnlocl.Add(gn.location);
                         theNavigatorGraph.addLocations(gnlocl);
 
-                        // Mark obstacles manually for now.
-                        manualObstacleMark(theNavigatorGraph);
                         List<Location> obstacles = theNavigatorGraph.getObstacles();
                         theMapForm.setViewGraphObstacles(obstacles);
 
                         // Find path and begin navigation.
                         TargetGathNode = nearestVisibleGatheringNode(thePlayer, theGathNodeList);
                         List<Location> path = theNavigatorGraph.findPath(thePlayer.location, TargetGathNode.location);
+
                         // Remove last elements in path to make navigation slightly cleaner.
                         if (path.Count > 0) path.RemoveAt(path.Count - 1);
                         theMapForm.setViewPath(path);
@@ -121,12 +120,6 @@ namespace FFTools {
                 }
             }
             return nearestGatheringNode;
-        }
-
-        private static void manualObstacleMark(NavigatorGraph theNavigatorGraph) {
-            // Lv10 Mineral Deposit Central Thanalan.
-            //Location obs = new Location(-79.5f, 13.5f);
-            //theNavigatorGraph.markObstacle(obs);
         }
     }
 }
