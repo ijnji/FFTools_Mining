@@ -1,4 +1,4 @@
 FFTools_Mining
 ==============
 
-Work In Progress - A non-teleporting mining bot for FFXIVARR (v2014.09.11).
+Prototype non-teleporting mining bot with pathfinding for Final Fantasy IV: A Realm Reborn. (v2014.09.11).
