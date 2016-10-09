@@ -13,6 +13,9 @@ namespace FFTools {
         private const Keys NAV_KEY_LEFT = Keys.A;
         private const Keys NAV_KEY_RIGHT = Keys.D;
         private const Keys NAV_KEY_CTRL_LEFT = Keys.NumPad4;
+        private const Keys NAV_KEY_CTRL_RIGHT = Keys.NumPad6;
+        private const Keys NAV_KEY_CTRL_UP = Keys.NumPad8;
+        private const Keys NAV_KEY_CTRL_DOWN = Keys.NumPad2;
         private const Keys NAV_KEY_TARGET_FRONT = Keys.NumPad7;
         private const Keys NAV_KEY_FACE_TARGET = Keys.NumPad9;
         private const Keys NAV_KEY_OPEN_NODE = Keys.NumPad1;
@@ -189,8 +192,7 @@ namespace FFTools {
                     if ( (Timer >= 3500) && (Command == 14) ) {
                         Command++; Timer = 0;
                         TheMemory.sendKeyDownMsg(NAV_KEY_OPEN_NODE); 
-                        System.Console.WriteLine("NAV: Mining a final time");
-                        
+                        System.Console.WriteLine("NAV: Mining a 4th time");
                     }
                     if ( (Timer >= 250) && (Command == 15) ) {
                         Command++; Timer = 0;
@@ -199,10 +201,21 @@ namespace FFTools {
 
                     if ( (Timer >= 3500) && (Command == 16) ) {
                         Command++; Timer = 0;
+                        TheMemory.sendKeyDownMsg(NAV_KEY_OPEN_NODE); 
+                        System.Console.WriteLine("NAV: Mining a final time");
+                        
+                    }
+                    if ( (Timer >= 250) && (Command == 17) ) {
+                        Command++; Timer = 0;
+                        TheMemory.sendKeyUpMsg(NAV_KEY_OPEN_NODE); 
+                    }
+
+                    if ( (Timer >= 3500) && (Command == 18) ) {
+                        Command++; Timer = 0;
                         System.Console.WriteLine("NAV: Waiting for node to close");
                     }
 
-                    if ( (Timer >= 1500) && (Command == 17) ) {
+                    if ( (Timer >= 1500) && (Command == 19) ) {
                         Command++; Timer = 0;
                         TargetLoc = null;
                         TargetLocList = null;

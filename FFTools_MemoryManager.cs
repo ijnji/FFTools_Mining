@@ -32,9 +32,8 @@ namespace FFTools {
         private static extern IntPtr PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
 
         // Pointer walk offsets for address bases
-        private int[] ADDR_PWALK_PLAYX = {0x103A2C0, 0x134, 0x4, 0xA0};
-        //private int[] ADDR_PWALK_FISHBITE = {0xFF7BDC, 0x0, 0x3C, 0x2C};
-        private int[] ADDR_PWALK_GATHNODELIST = {0x103A690, 0x184, 0x30};
+        private int[] ADDR_PWALK_PLAYX = {0x1044E40, 0x134, 0x4, 0xA0}; // Updated 2016.8
+        private int[] ADDR_PWALK_GATHNODELIST = {0x116518C, 0x170, 0x30}; // Updated 2016.8
         //private const int[] ADDR_PWALK_GENDIAG = {0xF20F70, 0x1C, 0x18, 0x42C, 0x0};
 
         // Address offsets from address bases.
@@ -49,7 +48,6 @@ namespace FFTools {
         // Other constants.
         private int[] GENDIAG_STARTPATTERN = {0x02, 0x13, 0x06, 0x100, 0x100, 0x100, 0x100, 0x100, 0x03};
         private int[] GENDIAG_ENDPATTERN = {0x02, 0x13, 0x02, 0xEC, 0x03, 0x0D};
-        private int FISHBITE_BITE = 0x1;
         private const int GATHNODE_VIS = 0x0;
         private const int GATHNODE_INVIS = 0x80;
         private const int GATHNODELIST_LENGTH = 0x5000;
@@ -109,8 +107,8 @@ namespace FFTools {
 
             System.Console.WriteLine("---");
             //System.Console.WriteLine("Pointer walking for the gathering node list address...");
-            //AddrGathNodeList = pointerWalk(ProcAddrBase, ADDR_PWALK_GATHNODELIST);
-            AddrGathNodeList = (IntPtr)0x1303D020;
+            AddrGathNodeList = pointerWalk(ProcAddrBase, ADDR_PWALK_GATHNODELIST);
+            // AddrGathNodeList = (IntPtr)0x14B32FF0;
             System.Console.WriteLine("Setting gathering node list address as 0x" + AddrGathNodeList.ToString("X8"));
          
             System.Console.WriteLine("---");
@@ -255,11 +253,6 @@ namespace FFTools {
                 endIndices.Enqueue(i);
             }
             return;
-        }
-
-        public bool readFishBite() {
-            if ( readProcInt(AddrFishBite) == FISHBITE_BITE ) return true;
-            else return false;
         }
 
         public List<GatheringNode> readGatheringNodeList(List<IntPtr> Addresses) {

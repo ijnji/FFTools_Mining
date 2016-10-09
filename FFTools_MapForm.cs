@@ -312,7 +312,7 @@ namespace FFTools {
             // Un/pause Button
             gForm.FillRectangle(Brushes.Black, 220, 20, GRID_BUTTON_WIDTH, GRID_BUTTON_HEIGHT);
             gForm.DrawRectangle(linePen, new Rectangle(220, 20, GRID_BUTTON_WIDTH, GRID_BUTTON_HEIGHT));
-            gForm.DrawString("Un/pause", lineFont, Brushes.White, 220 + 1, 22 + GRID_BUTTON_TXT_OFF_Y, new StringFormat());   
+            gForm.DrawString("  Pause", lineFont, Brushes.White, 220 + 1, 22 + GRID_BUTTON_TXT_OFF_Y, new StringFormat());   
 
             // Exit Button
             gForm.FillRectangle(Brushes.Black, 320, 20, GRID_BUTTON_WIDTH, GRID_BUTTON_HEIGHT);
