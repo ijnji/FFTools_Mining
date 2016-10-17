@@ -5,4 +5,5 @@ Prototype non-teleporting mining bot with pathfinding for Final Fantasy IV: A Re
 
 ## Demostrations
 A recording of the bot running in Central Thanalan.
+
 https://www.youtube.com/watch?v=tMSqgoHFoxE
